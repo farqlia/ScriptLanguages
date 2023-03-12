@@ -1,3 +1,6 @@
+'''C:\Users\julia\PycharmProjects\ScriptLanguages\labs\src\lab1\triangle.py'''
+
+
 def triangle_area(_length, _height):
     return 1 / 2 * _length * _height
 

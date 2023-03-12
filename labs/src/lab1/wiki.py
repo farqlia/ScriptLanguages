@@ -9,7 +9,7 @@ def get_page(_page_name):
 
     try:
         page = wikipedia.page(page_name)
-        page_url = page.title
+        page_url = page.url
         page_summary = page.summary
     except DisambiguationError as e:
         print("The page is ambiguous: it may refer to any from the list: ",
