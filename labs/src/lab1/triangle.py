@@ -1,4 +1,4 @@
-'''C:\Users\julia\PycharmProjects\ScriptLanguages\labs\src\lab1\triangle.py'''
+# '''C:\Users\julia\PycharmProjects\ScriptLanguages\labs\src\lab1\triangle.py'''
 
 
 def triangle_area(_length, _height):
@@ -8,7 +8,7 @@ def triangle_area(_length, _height):
 def read_non_negative_int(var_name):
     while True:
         try:
-            value = int(input(f"Enter {var_name}: "))
+            value = float(input(f"Enter {var_name}: "))
             if value < 0:
                 raise ValueError
             return value
@@ -16,7 +16,9 @@ def read_non_negative_int(var_name):
             print("Enter non-negative integer value")
 
 
-length = read_non_negative_int("length")
-height = read_non_negative_int("height")
+if __name__ == "__main__":
 
-print(f"Triangle area = {triangle_area(length, height)}")
+    length = read_non_negative_int("length")
+    height = read_non_negative_int("height")
+
+    print(f"Triangle area = {triangle_area(length, height)}")
