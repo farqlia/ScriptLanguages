@@ -3,8 +3,8 @@ from collections import namedtuple
 import datetime as dt
 
 
-REGEX = "(?P<hostname>.+) - - \[(?P<date>.+) -\d+\] \"(?P<log_details>.+)\" (?P<response_code>\d+) " \
-        "(?P<bytes>\d+)"
+REGEX = "(?P<hostname>.+) - - \[(?P<date>.+) -\d+\] \"(?P<log_details>.+)\" " \
+        "(?P<response_code>\d+) (?P<bytes>.+)"
 
 DATE_FORMAT = "%d/%b/%Y:%H:%M:%S"
 
@@ -19,7 +19,7 @@ def parse_log_line(line):
         raise ValueError("Invalid format")
 
     try:
-        log_details = match.group('log_details').split('\s+')
+        log_details = match.group('log_details').split()
         http_method, resource_path = log_details[0], log_details[1]
 
         log = Log(hostname=match.group('hostname'),

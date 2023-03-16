@@ -2,14 +2,13 @@ import sys
 from labs.src.lab2.parse_data import parse_log_line
 
 
-def filter_data(predicate):
+def reduce_data(reduction):
 
-    data = ""
+    result = reduction(parse_log_line(sys.stdin.readline()))
     for line in sys.stdin:
         try:
-            if predicate(parse_log_line(line)):
-                data += line + "\n"
+            result = reduction(parse_log_line(line), result)
         except ValueError:
             sys.stderr.write(f"Couldn't parse line: {line}")
 
-    return data
+    return result

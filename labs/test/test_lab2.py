@@ -62,6 +62,11 @@ def test_protocol_info():
     assert match.group('protocol') == 'HTTP/1.0'
 
 
+@pytest.mark.parametrize("log", ['ppp-nyc-2-36.ios.com - - [22/Jul/1995:15:06:43 -0400] "GET /shuttle/missions/51-l/sounds/ HTTP/1.0" 200 -',
+                                 'dal28.onramp.net - - [21/Jul/1995:23:03:36 -0400] "GET /cgi-bin/imagemap/countdown70?259,240 HTTP/1.0" 302 97'])
+def test_valid_input_for_log_conversion(log):
+    assert parse_log_line(log)
+
 @pytest.mark.parametrize("log,mess", [('- - [01/Jul/1995:00:00:27 -0400] "GET / HTTP/1.0" 200 7074', 'missing hostname'),
                                  ('ppp-mia-30.shadow.net [01/Jul/1995:00:00:27 -0400] "GET / HTTP/1.0" 200 7074', 'missing - -'),
                                     ('ppp-mia-30.shadow.net - - [01//1995:00:00:27 -0400] "GET / HTTP/1.0" 200 7074', 'missing month name'),

@@ -1,4 +1,8 @@
-from labs.src.lab2.filter_func import filter_data
-from labs.src.lab2.filter_response_code import filter_response_code
+from labs.src.lab2.reduce_data import reduce_data
 
-filter_data(filter_response_code(200))
+
+def count_logs_with_response_code(response_code):
+    def count(log, accumulator=0):
+        return accumulator + (log.response_code == response_code)
+
+    return reduce_data(count)
