@@ -1,4 +1,5 @@
 import sys
+import labs as l
 
 n = len(sys.argv)
 

@@ -9,5 +9,6 @@ def filter_by_day(day_number):
 
     return filter_lines(filter)
 
+
 if __name__ == '__main__':
     filter_by_day(day_of_week)
