@@ -10,5 +10,5 @@ def sum_bytes(conversion_unit=1):
 
     return reduce_data(sum) / conversion_unit
 
-
-print(sum_bytes(gigabyte_in_bytes))
+if __name__ == '__main__':
+    print(sum_bytes(gigabyte_in_bytes))

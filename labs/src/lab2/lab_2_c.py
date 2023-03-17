@@ -9,6 +9,7 @@ def log_with_max_resource():
     return reduce_data(comparison)
 
 
-log = log_with_max_resource()
-print(log.resource_path)
-print(log.bytes)
+if __name__ == '__main__':
+    log = log_with_max_resource()
+    print(log.resource_path)
+    print(log.bytes)

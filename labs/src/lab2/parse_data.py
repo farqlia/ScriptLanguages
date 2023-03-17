@@ -30,6 +30,8 @@ def parse_log_line(line):
                   bytes=int(match.group('bytes')) if match.group('bytes').isdigit() else 0)
     except ValueError:
         raise ValueError("Invalid format")
+    except IndexError:
+        raise ValueError("Invalid format")
 
     return log
 

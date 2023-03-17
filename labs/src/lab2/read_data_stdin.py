@@ -10,5 +10,21 @@ a given context '''
 
 # lines = 10
 
-for line in sys.stdin:
-    print(line)
+if len(sys.argv) > 1 and sys.argv[1].isdigit():
+    lines = int(sys.argv[1])
+else:
+    lines = 0
+
+if lines > 0:
+    for _ in range(lines):
+        print(sys.stdin.readline().rstrip())
+
+else:
+    for line in sys.stdin:
+        print(line.rstrip())
+
+ #   lines -= 1
+  #  if not lines:
+  #      break
+
+

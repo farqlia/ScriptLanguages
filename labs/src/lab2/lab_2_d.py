@@ -11,5 +11,5 @@ def compute_graphics_fraction():
 
     return n_of_files_filtered / n_of_all_files
 
-
-print("{:.2f}".format(compute_graphics_fraction()))
+if __name__ == '__main__':
+    print("{:.2f}".format(compute_graphics_fraction()))

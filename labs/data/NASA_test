@@ -4,3 +4,4 @@ rima.ccsi.com - - [22/Jul/1995:15:07:00 -0400] "GET /persons/astronauts/m-to-p/p
 halifax-ts1-63.nstn.ca - - [22/Jul/1995:15:07:01 -0400] "GET /images/NASA-logosmall.gif HTTP/1.0" 200 786
 vm.marist.edu - - [22/Jul/1995:15:19:58 -0400] "GET /history/astp/flight-summary.txt" 200 509
 dal28.onramp.net - - [21/Jul/1995:23:03:36 -0400] "GET /cgi-bin/imagemap/countdown70?259,240 HTTP/1.0" 302 97
+netcom16.netcom.com - - [01/Jul/1995:01:02:21 -0400] "GET /facts/facts.html HTTP/1.0" 200 4717

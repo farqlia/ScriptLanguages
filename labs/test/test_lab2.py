@@ -83,3 +83,10 @@ def test_invalid_input_for_log_conversion(log, mess):
 
 def test_for_numeric():
     assert "5466".isdigit()
+
+
+def test_date_for_day():
+
+    td = dt.datetime.today()
+
+    assert td.isoweekday() == 5
