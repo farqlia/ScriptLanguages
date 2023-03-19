@@ -2,6 +2,7 @@ from labs.src.lab2.filter_func import filter_lines
 
 day_of_week = 5
 
+
 def filter_by_day(day_number):
 
     def filter(log):

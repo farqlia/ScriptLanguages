@@ -2,9 +2,9 @@ import re
 from collections import namedtuple
 import datetime as dt
 
-
-REGEX = "(?P<hostname>.+) - - \[(?P<date>.+) -\d+\] \"(?P<log_details>.+)\" " \
-        "(?P<response_code>\d+) (?P<bytes>.+)"
+REGEX = r"(?P<hostname>.+) - - \[(?P<date>.+) -\d+\] " \
+        r"\"(?P<log_details>.+)\" " \
+        r"(?P<response_code>\d+) (?P<bytes>.+)"
 
 DATE_FORMAT = "%d/%b/%Y:%H:%M:%S"
 
@@ -12,7 +12,6 @@ Log = namedtuple('Log', 'hostname date method resource_path response_code bytes'
 
 
 def parse_log_line(line):
-
     match = re.match(REGEX, line)
 
     if not match:
@@ -34,5 +33,3 @@ def parse_log_line(line):
         raise ValueError("Invalid format")
 
     return log
-
-
