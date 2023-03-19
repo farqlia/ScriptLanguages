@@ -15,7 +15,7 @@ def parse_log_line(line):
     match = re.match(REGEX, line)
 
     if not match:
-        raise ValueError("Invalid format")
+        raise ValueError(f"Invalid format found at line = {line}")
 
     try:
         log_details = match.group('log_details').split()
@@ -27,9 +27,10 @@ def parse_log_line(line):
                   resource_path=resource_path,
                   response_code=int(match.group('response_code')),
                   bytes=int(match.group('bytes')) if match.group('bytes').isdigit() else 0)
+
     except ValueError:
-        raise ValueError("Invalid format")
+        raise ValueError(f"Invalid format found at line = {line}")
     except IndexError:
-        raise ValueError("Invalid format")
+        raise ValueError(f"Invalid format found at line = {line}")
 
     return log

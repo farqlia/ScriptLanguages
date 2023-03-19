@@ -3,10 +3,10 @@ from labs.src.lab2.reduce_data import reduce_data
 
 def log_with_max_resource():
 
-    def comparison(log, accumulator=None):
+    def reduce_max(log, accumulator=None):
         return log if not accumulator else (log if log.bytes > accumulator.bytes else accumulator)
 
-    return reduce_data(comparison)
+    return reduce_data(reduce_max)
 
 
 if __name__ == '__main__':
