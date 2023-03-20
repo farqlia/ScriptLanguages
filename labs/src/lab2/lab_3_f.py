@@ -4,11 +4,14 @@ from labs.src.lab2.filter_func import filter_lines
 def is_between_hours(start_hour, end_hour):
 
     if end_hour < start_hour:
-        predicate = lambda h: h >= start_hour or h <= end_hour
+        predicate = lambda h: h >= start_hour or h < end_hour
     else:
-        predicate = lambda h: h >= start_hour and h <= end_hour
+        predicate = lambda h: start_hour <= h < end_hour
 
-    return predicate
+    def filter_inner(log):
+        return predicate(log.date.hour)
+
+    return filter_inner
 
 
 def filter_by_hour():
