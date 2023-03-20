@@ -1,7 +1,5 @@
 from labs.src.lab2.filter_func import filter_lines
 
-day_of_week = 5
-
 
 def filter_by_day(day_number):
 
@@ -11,5 +9,10 @@ def filter_by_day(day_number):
     return filter_lines(filter)
 
 
-if __name__ == '__main__':
+def filter_from_friday():
+    day_of_week = 5
     filter_by_day(day_of_week)
+
+
+if __name__ == '__main__':
+    filter_from_friday()
