@@ -9,10 +9,10 @@ def filter_by_day(day_number):
     return filter_lines(filter)
 
 
-def filter_from_friday():
+def main():
     day_of_week = 5
     filter_by_day(day_of_week)
 
 
 if __name__ == '__main__':
-    filter_from_friday()
+    main()

@@ -12,4 +12,4 @@ def sum_bytes(conversion_unit=1):
 
 
 if __name__ == '__main__':
-    print(sum_bytes(gigabyte_in_bytes))
+    print("{:.2f}".format(sum_bytes(gigabyte_in_bytes)), " GB")

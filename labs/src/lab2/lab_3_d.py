@@ -12,9 +12,9 @@ def compute_fraction(predicate):
     return n_of_files_filtered / n_of_all_files
 
 
-def compute_graphics_fraction():
+def main():
     return compute_fraction(is_resource_of_type('gif', 'jpg', 'jpeg', 'xbm'))
 
 
 if __name__ == '__main__':
-    print("{:.2f}".format(compute_graphics_fraction()))
+    print("{:.2f}".format(main()))

@@ -1,4 +1,4 @@
-def is_resource_of_type(log, *possible_extensions):
+def is_resource_of_type(*possible_extensions):
 
     def filter_inner(log):
         return any(log.resource_path.lower().endswith('.' + extension)

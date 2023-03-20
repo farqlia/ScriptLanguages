@@ -14,9 +14,9 @@ def is_between_hours(start_hour, end_hour):
     return filter_inner
 
 
-def filter_by_hour():
+def main():
     filter_lines(is_between_hours(22, 6))
 
 
 if __name__ == '__main__':
-    filter_by_hour()
+    main()
