@@ -2,7 +2,7 @@ import re
 from collections import namedtuple
 import datetime as dt
 import pytest
-from labs.src.lab2.parse_data import parse_log_line, REGEX, DATE_FORMAT
+from labs.lab2 import parse_log_line, REGEX, DATE_FORMAT
 
 log_regex = REGEX
 

@@ -1,4 +1,4 @@
-from labs.src.lab2.filter_func import filter_lines
+from labs.lab2.src.filter_func import filter_lines
 
 
 def is_between_hours(start_hour, end_hour):

@@ -1,4 +1,4 @@
-from labs.src.lab2.reduce_data import reduce_data
+from labs.lab2.src.reduce_data import reduce_data
 
 
 def count_logs_with_response_code(response_code):

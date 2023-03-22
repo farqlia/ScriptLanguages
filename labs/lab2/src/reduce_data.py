@@ -1,5 +1,5 @@
 import sys
-from labs.src.lab2.parse_data import parse_log_line
+from labs.lab2.src.parse_data import parse_log_line
 
 
 def reduce_data(reduction):

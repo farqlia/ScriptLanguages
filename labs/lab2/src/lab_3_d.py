@@ -1,5 +1,5 @@
-from labs.src.lab2.reduce_data import reduce_data
-from labs.src.lab2.filter_file_extensions import is_resource_of_type
+from labs.lab2.src.reduce_data import reduce_data
+from labs.lab2.src.filter_file_extensions import is_resource_of_type
 
 
 def compute_fraction(predicate):
