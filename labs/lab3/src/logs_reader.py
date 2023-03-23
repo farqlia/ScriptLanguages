@@ -8,6 +8,12 @@ REGEX = r"(?P<hostname>.+) - - \[(?P<date>.+) -\d+\] " \
 
 DATE_FORMAT = "%d/%b/%Y:%H:%M:%S"
 
+HOSTNAME_INDEX = 0
+DATE_INDEX = 1
+HTTP_METHOD_INDEX = 2
+RESOURCE_PATH_INDEX = 3
+RESPONSE_CODE_INDEX = 4
+BYTES_INDEX = 5
 
 def read_logs(source=sys.stdin):
 
