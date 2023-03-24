@@ -1,3 +1,4 @@
+import datetime
 import re
 import datetime as dt
 import sys
@@ -15,16 +16,17 @@ RESOURCE_PATH_INDEX = 3
 STATUS_CODE_INDEX = 4
 BYTES_INDEX = 5
 
-def read_logs(source=sys.stdin):
 
-    logs = []
+def read_logs(source=sys.stdin, error=sys.stdin):
+
+    log = []
     for line in source:
         try:
-            logs.append(parse_log(line))
-        except ValueError as e:
-            sys.stderr.write(e.message)
+            log.append(parse_log(line))
+        except ValueError:
+            error.write(f"Couldn't parse: {line}")
 
-    return logs
+    return log
 
 
 def parse_log(line):
@@ -72,12 +74,11 @@ def entry_to_dict(log):
         return dict_log
 
 
-def log_to_dict(logs):
+def log_to_dict(log):
 
     log_dict = {}
-    for l in logs:
+    for l in log:
         if l[HOSTNAME_INDEX] not in log_dict:
             log_dict[l[HOSTNAME_INDEX]] = []
         log_dict[l[HOSTNAME_INDEX]].append(l)
     return log_dict
-

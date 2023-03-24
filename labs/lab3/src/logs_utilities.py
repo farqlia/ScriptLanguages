@@ -4,13 +4,20 @@ from functools import partial
 
 def sort_log(logs, key):
 
-    if logs:
-        if key < 0 or key > len(logs[0]):
-            raise IndexError("Key index out of bounds")
+    if not logs or key < 0 or key > len(logs[0]):
+        raise IndexError("Key index out of bounds")
 
-        logs = sorted(logs, key=lambda l: l[key])
+    logs = sorted(logs, key=lambda l: l[key])
 
     return logs
+
+
+def is_response_code_valid(code):
+    return 100 <= code <= 599
+
+
+def is_entry_response_code_valid(log):
+    return is_response_code_valid(log[lr.STATUS_CODE_INDEX])
 
 
 def filter_logs(logs, *predicates):
@@ -24,26 +31,19 @@ def is_resource(log, resource):
     return log[lr.HOSTNAME_INDEX] == resource
 
 
-def get_entries_by_addr(resource, logs):
+def get_entries_by_addr(resource, log):
 
-    return filter_logs(logs,
-                       # partial(is_response_code_type, code_prefix=2), ???????
-
+    return filter_logs(log,
+                       # is_log_response_code_valid,
                        partial(is_resource, resource=resource))
-
-
-def is_response_code_valid(code):
-
-    return 100 <= code <= 599
 
 
 def has_response_code(log, code):
     return log[lr.STATUS_CODE_INDEX] == code
 
 
-def get_entries_by_code(code, logs):
-
-    return filter_logs(logs, partial(has_response_code, code=code)) if is_response_code_valid(code) else []
+def get_entries_by_code(code, log):
+    return filter_logs(log, partial(has_response_code, code=code)) if is_response_code_valid(code) else []
 
 
 def is_response_code_type(log, code_prefix):
@@ -51,13 +51,13 @@ def is_response_code_type(log, code_prefix):
     return log[lr.STATUS_CODE_INDEX] // 100 == code_prefix
 
 
-def get_failed_reads(logs, merged=True):
+def get_failed_reads(log, merged=True):
 
     is_4xx = partial(is_response_code_type, code_prefix=4)
     is_5xx = partial(is_response_code_type, code_prefix=5)
 
-    failed_4xx_reads = filter_logs(logs, is_4xx)
-    failed_5xx_reads = filter_logs(logs, is_5xx)
+    failed_4xx_reads = filter_logs(log, is_4xx)
+    failed_5xx_reads = filter_logs(log, is_5xx)
 
     if merged:
         failed_reads = failed_4xx_reads + failed_5xx_reads
@@ -67,39 +67,43 @@ def get_failed_reads(logs, merged=True):
     return failed_reads
 
 
-def get_entries_by_extension(logs, *extensions):
-
-    def is_of_extension(log):
-        return any(log[lr.RESOURCE_PATH_INDEX].endswith('.' + ext) for ext in extensions)
-
-    return filter_logs(logs, is_of_extension)
+def is_of_extension(log, extension):
+    return log[lr.RESOURCE_PATH_INDEX].endswith('.' + extension)
 
 
-def print_entries(logs):
+# Many extensions?
+def get_entries_by_extension(log, extension):
+    return filter_logs(log, partial(is_of_extension, extension=extension))
 
-    for log in logs:
-        print(log)
+
+def print_entries(log):
+    for entry in log:
+        print(entry)
 
 
 def get_addrs(logs):
-    return logs.keys() if isinstance(logs, dict) else []
+    return list(logs.keys()) if isinstance(logs, dict) else []
 
 
-def string_dict_entry_dates(key, list_of_host_logs):
+def string_dict_entry_dates(key, list_of_host_log):
 
-    n = len(list_of_host_logs)
-    logs_200_fraction = len(get_entries_by_code(200, list_of_host_logs)) / n
-    sorted_by_date = sort_log(list_of_host_logs, lr.DATE_INDEX)
+    n = len(list_of_host_log)
+    logs_200_fraction = len(get_entries_by_code(200, list_of_host_log)) / n
+
+    by_date = lambda l: l[lr.DATE_INDEX]
+    oldest_entry = min(list_of_host_log, key=by_date)
+    recent_entry = max(list_of_host_log, key=by_date)
+
     date_format = "%d/%m/%Y"
 
-    info = f"{key} sent {n} queries between {sorted_by_date[0][lr.DATE_INDEX].strftime(date_format)} and " \
-           f"{sorted_by_date[-1][lr.DATE_INDEX].strftime(date_format)} with {round(logs_200_fraction, 2) * 100}% successful responses."
+    info = f"{key} sent {n} queries between {by_date(oldest_entry).strftime(date_format)} and " \
+           f"{by_date(recent_entry).strftime(date_format)} with {round(logs_200_fraction, 2) * 100}% successful responses."
 
     return info
 
 
-def print_dict_entry_dates(logs):
-    if isinstance(logs, dict):
-        for k, v in logs.items():
+def print_dict_entry_dates(log):
+    if isinstance(log, dict):
+        for k, v in log.items():
             print(string_dict_entry_dates(k, v))
 

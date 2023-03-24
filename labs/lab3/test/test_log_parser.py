@@ -48,7 +48,8 @@ class TestSortLogs:
                  'rima.ccsi.com - - [22/Jul/1995:15:07:00 -0400] "GET /persons/astronauts/m-to-p/pogueWR.txt HTTP/1.0" 404 -']
 
     def test_sort_empty(self):
-        assert sort_log([], lambda log: log[1]) == []
+        with pytest.raises(IndexError):
+            sort_log([], 1)
 
     @pytest.mark.parametrize("i", [-1, 10])
     def test_for_illegal_index(self, i):
@@ -62,7 +63,7 @@ class TestSortLogs:
         assert sort_log(logs, lr.BYTES_INDEX) == sorted_by_size
 
 
-@pytest.mark.xfail
+# @pytest.mark.xfail
 class TestGetEntriesByAddr:
 
     test_logs = ['onyx.southwind.net - - [01/Jul/1995:00:01:34 -0400] "GET /shuttle/countdown/countdown.html HTTP/1.0" 200 3985',
@@ -70,14 +71,16 @@ class TestGetEntriesByAddr:
                  'onyx.southwind.net - - [01/Jul/1995:00:01:39 -0400] "GET /images/KSC-logosmall.gif HTTP/1.0" 304 0',
                  'rima.ccsi.com - - [22/Jul/1995:15:07:00 -0400] "GET /persons/astronauts/m-to-p/pogueWR.txt HTTP/1.0" 404 -']
 
-    def test_for_successful_code(self):
+    def test_for_present_host_1(self):
         logs = read_logs(self.test_logs)
-        assert log_utils.get_entries_by_addr("onyx.southwind.net",
-                                             logs) == [logs[0], logs[1]]
+        assert log_utils.get_entries_by_addr("onyx.southwind.net", logs) == logs[:3]
 
-    def test_for_unsuccesful_code(self):
-        assert log_utils.get_entries_by_addr("rima.ccsi.com",
-                                             read_logs(self.test_logs)) == []
+    def test_for_present_host_2(self):
+        logs = read_logs(self.test_logs)
+        assert log_utils.get_entries_by_addr("rima.ccsi.com", read_logs(self.test_logs)) == [logs[3]]
+
+    def test_for_missing_host(self):
+        assert log_utils.get_entries_by_addr("/", read_logs(self.test_logs)) == []
 
 
 class TestGetEntriesByCode:
@@ -89,12 +92,10 @@ class TestGetEntriesByCode:
 
     def test_for_200_code(self):
         logs = read_logs(self.test_logs)
-        assert log_utils.get_entries_by_code(200,
-                                             logs) == [logs[0], logs[1]]
+        assert log_utils.get_entries_by_code(200, logs) == [logs[0], logs[1]]
 
     def test_for_500_code(self):
-        assert log_utils.get_entries_by_code(500,
-                                             read_logs(self.test_logs)) == []
+        assert log_utils.get_entries_by_code(-23, read_logs(self.test_logs)) == []
 
 
 class TestGetFailedReads:
@@ -118,6 +119,7 @@ class TestGetFailedReads:
 
 
 class TestGetEntriesByExtension:
+
     test_logs = [
         'onyx.southwind.net - - [01/Jul/1995:00:01:34 -0400] "GET /shuttle/countdown/countdown.html HTTP/1.0" 403 -',
         'onyx.southwind.net - - [01/Jul/1995:00:01:35 -0400] "GET /shuttle/countdown/count.gif HTTP/1.0" 500 -',
@@ -127,10 +129,10 @@ class TestGetEntriesByExtension:
 
     def test_for_extension(self):
         logs = read_logs(self.test_logs)
-        assert log_utils.get_entries_by_extension(logs, 'gif', 'html') == [logs[0], logs[1], logs[4]]
+        assert log_utils.get_entries_by_extension(logs, 'gif') == [logs[1], logs[4]]
 
 
-class TestLogToDict:
+class TestDictionaryPart:
 
     test_logs = [
         'onyx.southwind.net - - [01/Jul/1995:00:01:34 -0400] "GET /shuttle/countdown/countdown.html HTTP/1.0" 403 -',
@@ -142,6 +144,12 @@ class TestLogToDict:
         logs = read_logs(self.test_logs)
         assert log_to_dict(logs) == {'onyx.southwind.net': logs[:3], 'rima.ccsi.com': [logs[3]]}
 
+    def test_convert_to_dict_illegal(self):
+        test_log = (dt.datetime(day=22, month=7, year=1995, hour=15, minute=6, second=40),
+                       'GET', '/htbin/cdt_main.pl', 200, 3714)
+        with pytest.raises(ValueError):
+            lr.entry_to_dict([test_log])
+
     def test_get_addr(self):
         logs = log_to_dict(read_logs(self.test_logs))
         assert set(log_utils.get_addrs(logs)) == {'onyx.southwind.net', 'rima.ccsi.com'}
@@ -149,5 +157,6 @@ class TestLogToDict:
     def test_printing(self):
         logs = log_to_dict(read_logs(self.test_logs))
         key = 'onyx.southwind.net'
-        assert log_utils.string_dict_entry_dates(key, logs[key]) == "onyx.southwind.net sent 3 queries between 01/07/1995" \
+        assert log_utils.string_dict_entry_dates(key,
+                                                 logs[key]) == "onyx.southwind.net sent 3 queries between 01/07/1995" \
                                                                     " and 01/07/1995 with 33.0% successful responses."

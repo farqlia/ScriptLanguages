@@ -7,7 +7,8 @@ In python we can make use of subtyping without inheritance
 This is why we can implement only the functions we need in 
 a given context '''
 
-if __name__ == '__main__':
+
+def read_lines():
 
     if len(sys.argv) > 1 and sys.argv[1].isdigit():
         lines = int(sys.argv[1])
@@ -21,6 +22,11 @@ if __name__ == '__main__':
     else:
         for line in sys.stdin:
             print(line.rstrip())
+
+
+if __name__ == '__main__':
+
+    read_lines()
 
 
 
