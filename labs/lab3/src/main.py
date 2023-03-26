@@ -2,11 +2,14 @@ import logs_reader as lr
 import logs_utilities as utils
 import labs.lab2.src.lab_2 as lab2
 
-'''(base) C:\Users\julia\PycharmProjects\ScriptLanguages\labs>type nasa_data\NASA | python lab2\src\lab_2.py 500 | python lab3\src\main.py'''
+r'''
+cd PycharmProjects/ScriptLanguages/labs
+type nasa_data\NASA | python lab2\src\lab_2.py 500 | python lab3\src\main.py
+'''
 
 # lab2.read_lines()
 
-log = lr.read_logs()
+log = lr.read_log()
 
 
 print("Entries from standard input")

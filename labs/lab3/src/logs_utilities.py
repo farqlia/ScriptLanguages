@@ -12,19 +12,8 @@ def sort_log(logs, key):
     return logs
 
 
-def is_response_code_valid(code):
-    return 100 <= code <= 599
-
-
 def is_entry_response_code_valid(log):
     return is_response_code_valid(log[lr.STATUS_CODE_INDEX])
-
-
-def filter_logs(logs, *predicates):
-
-    filtered = [log for log in logs if all(predicate(log) for predicate in predicates)]
-
-    return filtered
 
 
 def is_resource(log, resource):
@@ -32,18 +21,19 @@ def is_resource(log, resource):
 
 
 def get_entries_by_addr(resource, log):
-
-    return filter_logs(log,
-                       # is_log_response_code_valid,
-                       partial(is_resource, resource=resource))
+    return list(filter(partial(is_resource, resource=resource), log))
 
 
 def has_response_code(log, code):
     return log[lr.STATUS_CODE_INDEX] == code
 
 
+def is_response_code_valid(code):
+    return 100 <= code <= 599
+
+
 def get_entries_by_code(code, log):
-    return filter_logs(log, partial(has_response_code, code=code)) if is_response_code_valid(code) else []
+    return list(filter(partial(has_response_code, code=code), log)) if is_response_code_valid(code) else []
 
 
 def is_response_code_type(log, code_prefix):
@@ -56,8 +46,8 @@ def get_failed_reads(log, merged=True):
     is_4xx = partial(is_response_code_type, code_prefix=4)
     is_5xx = partial(is_response_code_type, code_prefix=5)
 
-    failed_4xx_reads = filter_logs(log, is_4xx)
-    failed_5xx_reads = filter_logs(log, is_5xx)
+    failed_4xx_reads = list(filter(is_4xx, log))
+    failed_5xx_reads = list(filter(is_5xx, log))
 
     if merged:
         failed_reads = failed_4xx_reads + failed_5xx_reads
@@ -71,9 +61,8 @@ def is_of_extension(log, extension):
     return log[lr.RESOURCE_PATH_INDEX].endswith('.' + extension)
 
 
-# Many extensions?
 def get_entries_by_extension(log, extension):
-    return filter_logs(log, partial(is_of_extension, extension=extension))
+    return list(filter(partial(is_of_extension, extension=extension), log))
 
 
 def print_entries(log):
@@ -96,7 +85,7 @@ def string_dict_entry_dates(key, list_of_host_log):
 
     date_format = "%d/%m/%Y"
 
-    info = f"{key} sent {n} queries between {by_date(oldest_entry).strftime(date_format)} and " \
+    info = f"{key} sent {n} {'query' if n == 1 else 'queries'} between {by_date(oldest_entry).strftime(date_format)} and " \
            f"{by_date(recent_entry).strftime(date_format)} with {round(logs_200_fraction, 2) * 100}% successful responses."
 
     return info

@@ -4,7 +4,7 @@ from typing import TextIO
 import pytest
 import datetime as dt
 
-from labs.lab3.src.logs_reader import parse_log, read_logs, log_to_dict
+from labs.lab3.src.logs_reader import parse_entry, read_log, log_to_dict
 import labs.lab3.src.logs_reader as lr
 from labs.lab3.src.logs_utilities import sort_log
 import labs.lab3.src.logs_utilities as log_utils
@@ -19,7 +19,7 @@ class TestParseLog:
                              correct_cases)
     def test_correct_cases(self, line, fields):
 
-        assert parse_log(line) == fields
+        assert parse_entry(line) == fields
 
 
 class TestReadLog:
@@ -37,7 +37,7 @@ class TestReadLog:
         yield f
 
     def test_correct_cases(self, prepare):
-        assert len(read_logs(self.test_logs)) == len(self.test_logs)
+        assert len(read_log(self.test_logs)) == len(self.test_logs)
 
 
 class TestSortLogs:
@@ -53,12 +53,12 @@ class TestSortLogs:
 
     @pytest.mark.parametrize("i", [-1, 10])
     def test_for_illegal_index(self, i):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         with pytest.raises(IndexError):
             sort_log(logs, i)
 
     def test_sorting_logs(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         sorted_by_size = [logs[3], logs[1], logs[2], logs[0]]
         assert sort_log(logs, lr.BYTES_INDEX) == sorted_by_size
 
@@ -72,15 +72,15 @@ class TestGetEntriesByAddr:
                  'rima.ccsi.com - - [22/Jul/1995:15:07:00 -0400] "GET /persons/astronauts/m-to-p/pogueWR.txt HTTP/1.0" 404 -']
 
     def test_for_present_host_1(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         assert log_utils.get_entries_by_addr("onyx.southwind.net", logs) == logs[:3]
 
     def test_for_present_host_2(self):
-        logs = read_logs(self.test_logs)
-        assert log_utils.get_entries_by_addr("rima.ccsi.com", read_logs(self.test_logs)) == [logs[3]]
+        logs = read_log(self.test_logs)
+        assert log_utils.get_entries_by_addr("rima.ccsi.com", read_log(self.test_logs)) == [logs[3]]
 
     def test_for_missing_host(self):
-        assert log_utils.get_entries_by_addr("/", read_logs(self.test_logs)) == []
+        assert log_utils.get_entries_by_addr("/", read_log(self.test_logs)) == []
 
 
 class TestGetEntriesByCode:
@@ -91,11 +91,11 @@ class TestGetEntriesByCode:
         'rima.ccsi.com - - [22/Jul/1995:15:07:00 -0400] "GET /persons/astronauts/m-to-p/pogueWR.txt HTTP/1.0" 404 -']
 
     def test_for_200_code(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         assert log_utils.get_entries_by_code(200, logs) == [logs[0], logs[1]]
 
     def test_for_500_code(self):
-        assert log_utils.get_entries_by_code(-23, read_logs(self.test_logs)) == []
+        assert log_utils.get_entries_by_code(-23, read_log(self.test_logs)) == []
 
 
 class TestGetFailedReads:
@@ -108,11 +108,11 @@ class TestGetFailedReads:
         'unicomp6.unicomp.net - - [01/Jul/1995:00:00:14 -0400] "GET /images/NASA-logosmall.gif HTTP/1.0" 200 786']
 
     def test_for_merged_failed_reads(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         assert log_utils.get_failed_reads(logs, merged=True) == [logs[0], logs[3], logs[1], logs[2]]
 
     def test_for_split_failed_reads(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         logs_4xx, logs_5xx = log_utils.get_failed_reads(logs, merged=False)
         assert logs_4xx == [logs[0], logs[3]]
         assert logs_5xx == [logs[1], logs[2]]
@@ -128,7 +128,7 @@ class TestGetEntriesByExtension:
         'unicomp6.unicomp.net - - [01/Jul/1995:00:00:14 -0400] "GET /images/NASA-logosmall.gif HTTP/1.0" 200 786']
 
     def test_for_extension(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         assert log_utils.get_entries_by_extension(logs, 'gif') == [logs[1], logs[4]]
 
 
@@ -141,7 +141,7 @@ class TestDictionaryPart:
         'rima.ccsi.com - - [22/Jul/1995:15:07:00 -0400] "GET /persons/astronauts/m-to-p/pogueWR.txt HTTP/1.0" 404 -']
 
     def test_convert_to_dict(self):
-        logs = read_logs(self.test_logs)
+        logs = read_log(self.test_logs)
         assert log_to_dict(logs) == {'onyx.southwind.net': logs[:3], 'rima.ccsi.com': [logs[3]]}
 
     def test_convert_to_dict_illegal(self):
@@ -151,11 +151,11 @@ class TestDictionaryPart:
             lr.entry_to_dict([test_log])
 
     def test_get_addr(self):
-        logs = log_to_dict(read_logs(self.test_logs))
+        logs = log_to_dict(read_log(self.test_logs))
         assert set(log_utils.get_addrs(logs)) == {'onyx.southwind.net', 'rima.ccsi.com'}
 
     def test_printing(self):
-        logs = log_to_dict(read_logs(self.test_logs))
+        logs = log_to_dict(read_log(self.test_logs))
         key = 'onyx.southwind.net'
         assert log_utils.string_dict_entry_dates(key,
                                                  logs[key]) == "onyx.southwind.net sent 3 queries between 01/07/1995" \
