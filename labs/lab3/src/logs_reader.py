@@ -1,3 +1,4 @@
+import datetime
 import re
 import datetime as dt
 import sys
@@ -74,7 +75,6 @@ def entry_to_dict(entry):
 
 
 def log_to_dict(logs):
-
     log_dict = {}
     for entry in logs:
         if entry[HOSTNAME_INDEX] not in log_dict:
