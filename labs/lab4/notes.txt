@@ -1,0 +1,10 @@
+Jak to zrobic zeby na wielu platformach
+Jak operując narzędziami i mając katalog, jakie są pliki wewnątrz tego katalogu,
+jakie są plikami wykonywalnymi
+
+4 to juz na naszym tylko moze byc
+Po każdym wytworzeniu kopii zapasowej
+dodac do pliku rekord - zmodyfikowac w trybie append
+
+I przywrocenie z kopii zapasowej
+Wszystkie backupy mu wyswietlamy a on wybiera

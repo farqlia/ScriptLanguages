@@ -2,10 +2,12 @@ import fileinput
 import os
 import pathlib
 import shutil
+import subprocess
+import sys
 from subprocess import run, Popen, PIPE
 import csv
 import json
-
+from dotenv import load_dotenv
 import pytest
 
 
@@ -72,6 +74,7 @@ def visit_file(root, file):
 
 
 def traverse(directory, dir_callback, file_callback):
+    # By default it is top-down
     for root, dirs, files in os.walk(directory):
         for direc in dirs:
             dir_callback(root, direc)
@@ -89,11 +92,16 @@ def test_walktree_2():
     traverse(path, visit_dir, visit_file)
 
 
+def test_print_structure():
+    dirpath = r"C:\Users\julia\PycharmProjects\ScriptLanguages\lectures\filesystems\to_archive_dirs"
+    print(list(pathlib.Path(dirpath).iterdir()))
+
 @pytest.fixture()
 def mock_file(tmp_path):
     file = tmp_path.joinpath("file.txt")
     file.write_text("This is sparta")
     return file
+
 
 @pytest.fixture()
 def mock_file_opened(mock_file):
@@ -103,7 +111,6 @@ def mock_file_opened(mock_file):
     yield f
 
     f.close()
-
 
 
 def test_reading_file(mock_file_opened):
@@ -152,20 +159,38 @@ def test_many_inputs(mock_file, mock_file_2):
     assert data == "This is sparta\nThis is barcelona"
 
 
-# shutil : can use most linux files commands
-def test_shutil(mock_file, mock_file_2):
+class TestShutil:
+    # shutil : can use most linux files commands
+    def test_shutil(self, mock_file, mock_file_2):
 
-    f = open(mock_file, 'r')
-    f1 = open(mock_file_2, 'w')
+        f = open(mock_file, 'r')
+        f1 = open(mock_file_2, 'w')
 
-    shutil.copyfileobj(f, f1)
+        shutil.copyfileobj(f, f1)
 
-    f.close()
-    f1.close()
+        f.close()
+        f1.close()
+
+    def test_shutil_more(self):
+        assert r"C:\Users\julia\anaconda3\envs\ScriptLanguages\python.EXE" == shutil.which("python")
+
+    def test_make_archive(self):
+        path = "lectures/filesystems/to_archive_dirs"
+        # root_dir defines the root directory for the archive files: it is typically moved into
+        # before archiving
+        # base_dir are directories whose structure is archived : they must be relative to root_dir
+        archived = shutil.make_archive("my_archive", "gztar",
+                            root_dir=pathlib.Path(r"C:\Users\julia\PycharmProjects\ScriptLanguages\lectures\filesystems"),
+                            base_dir=pathlib.Path("to_archive_dirs"))
+        print(archived)
+        assert pathlib.Path(archived).exists()
+        p = run(["tar", "-tvf", f"{archived}"], stdout=PIPE)
+        archived_files = [e.split()[-1] for e in p.stdout.decode('utf-8').split('\r')]
+        print(archived_files)
+        # assert archived_files == ['to_archive_dirs', 'to_archive_dirs/archive_me',
+        #                          'to_archive_dirs/archive_me/Hello.txt', 'to_archive_dirs/archive_me_too', ]
 
 
-def test_shutil_more():
-    assert r"C:\Users\julia\anaconda3\envs\ScriptLanguages\python.EXE" == shutil.which("python")
 
 
 def test_use_environ():
@@ -173,10 +198,17 @@ def test_use_environ():
     assert os.pathsep == ';'
 
 
+def test_load_dotenv():
+    load_dotenv(r"C:\Users\julia\PycharmProjects\ScriptLanguages\lectures\filesystems\test\hidden.env")
+
+    assert os.environ['MY_VARIABLE'] == 'value'
+
+
 def test_run_process():
 
     p = run(["python", "-c", "print('Hello World')"])
     assert p.returncode == 0
+
 
 # Why not working
 def test_piped_process():
@@ -187,6 +219,17 @@ def test_piped_process():
 
     process.stdin.close()
     assert "8th line \n 9th line \n" == process.stdin.readlines()
+
+
+def test_process_communicate():
+
+    process = Popen(["grep", "Python"], stdin=PIPE,
+                    stdout=PIPE)
+    input_data = b"Hello\nThis is Python program\nEnd"
+
+    output, error = process.communicate(input=input_data)
+
+    assert "This is Python program" == output.decode('utf-8')
 
 
 @pytest.fixture()
@@ -226,3 +269,7 @@ def test_write_json(mock_json_file):
         data = json.loads(json_data.read())
 
     assert data == {"name": "Jan", "Nazwisko": "Kowalski"}
+
+
+def test_sys_args():
+    print(sys.argv)
