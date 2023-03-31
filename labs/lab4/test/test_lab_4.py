@@ -1,9 +1,10 @@
 import os
+import stat
 import sys
 from pathlib import Path
 import pytest_mock
 
-from labs.lab4.lab4_2 import get_path_contents
+from labs.lab4.lab4_2 import get_path_contents, is_exe_posix
 
 
 class TestPrintExecutable:
@@ -21,6 +22,12 @@ class TestPrintExecutable:
 
         assert not os.access(not_executable, os.X_OK)
         assert os.access(executable, os.X_OK)
+
+    def test_if_posix_exe(self):
+        print(os.stat(r"C:\Users\julia\anaconda3\bin\nvlink.exe").st_mode & stat.S_IXUSR)
+        print(os.stat(r"C:\Users\julia\anaconda3\bin\nvlink.exe").st_mode & stat.S_IXGRP)
+        print(os.stat(r"C:\Users\julia\anaconda3\bin\nvlink.exe").st_mode & stat.S_IXOTH)
+        print(is_exe_posix(r"C:\Users\julia\anaconda3\bin\nvlink.exe"))
 
     def test_get_path_folders_and_execs(self):
         dirs_and_execs = get_path_contents(include_execs=True)

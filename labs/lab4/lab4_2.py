@@ -1,5 +1,6 @@
 import os
 import pathlib
+import stat
 import sys
 
 
@@ -13,7 +14,8 @@ def is_exe_windows(filepath):
 
 
 def is_exe_posix(filepath):
-    os.access(filepath, os.X_OK)
+    return os.stat(filepath).st_mode == stat.S_IXUSR
+    # return os.access(filepath, os.X_OK)
 
 
 def is_executable():
