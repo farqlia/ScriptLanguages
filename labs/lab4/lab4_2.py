@@ -10,7 +10,7 @@ def get_path_listing():
 
 
 def is_exe_windows(filepath):
-    return filepath.name.endswith(".exe")
+    return filepath.suffix == "exe"
 
 
 def is_exe_posix(filepath):

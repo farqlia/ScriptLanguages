@@ -212,13 +212,9 @@ def test_run_process():
 
 # Why not working
 def test_piped_process():
+    process = Popen(["date", "/T"], stdin=PIPE, stdout=PIPE, text=True, shell=True)
 
-    process = Popen(["tail", "-n", "2"], stdin=PIPE, stdout=PIPE, text=True)
-    for i in range(10):
-        _ = process.stdin.write(f"{i}th line \n")
-
-    process.stdin.close()
-    assert "8th line \n 9th line \n" == process.stdin.readlines()
+    assert "Sat 04/01/2023" == process.stdout.readline().strip()
 
 
 def test_process_communicate():
@@ -230,6 +226,11 @@ def test_process_communicate():
     output, error = process.communicate(input=input_data)
 
     assert "This is Python program" == output.decode('utf-8')
+
+
+def test_absolute_pathname():
+    p = pathlib.Path(r"C:\Users\julia\PycharmProjects\ScriptLanguages\lectures\filesystems")
+    print(str(p.absolute()))
 
 
 @pytest.fixture()

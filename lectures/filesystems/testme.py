@@ -4,3 +4,5 @@ import pathlib
 print(pathlib.Path.cwd())
 # Directory where the file resides
 print(pathlib.Path(__file__).parent)
+
+print(pathlib.Path(__file__).stem)

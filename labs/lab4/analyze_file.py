@@ -1,35 +1,44 @@
 import json
-filepath = input("Enter file path: ")
+import sys
+from pathlib import Path
 
-n_of_lines = 0
-chars_count = {}
-words_count = {}
-n_words = 0
-n_chars = 0
+filepath = Path(sys.stdin.readline().strip())
 
-with open(filepath) as f:
-    for line in f:
-        n_of_lines += 1
-        words = line.split()
-        n_words += len(words)
-        for word in words:
-            words_count[word] += words_count.get(word, 0) + 1
-            chars_count += len(word)
-            for chr in word:
-                chars_count[chr] += chars_count.get(chr, 0) + 1
+if filepath.is_file():
+    n_of_lines = 0
+    chars_count = {}
+    words_count = {}
+    n_words = 0
+    n_chars = 0
 
-max_char = max(chars_count.keys(), key=lambda k: chars_count[k])
-max_word = max(words_count.keys(), key=lambda k: words_count[k])
+    with open(filepath, encoding='utf-8') as f:
+        for line in f:
+            n_of_lines += 1
+            words = line.split()
+            n_words += len(words)
+            for word in words:
+                words_count[word] = words_count.get(word, 0) + 1
+                n_chars += len(word)
+                for char in word:
+                    chars_count[char] = chars_count.get(char, 0) + 1
 
-data_dir = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\data"
+    max_char = max(chars_count.keys(), key=lambda k: chars_count[k])
+    max_word = max(words_count.keys(), key=lambda k: words_count[k])
 
-stats = {
-    'n_of_lines': n_of_lines,
-    'max_char': max_char,
-    'max_word': max_word,
-    'n_words': n_words,
-    'n_chars': n_chars
-}
+    data_dir = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\data"
 
-with open(data_dir + "\\stats.json") as f:
-    json.dump(stats, f, indent=4)
+    stats = {
+        'filepath': str(filepath.absolute()),
+        'n_of_lines': n_of_lines,
+        'max_char': max_char,
+        'max_word': max_word,
+        'n_words': n_words,
+        'n_chars': n_chars
+    }
+
+    with open(data_dir + f"\\{filepath.stem}_stats.json", mode='w') as f:
+        json.dump(stats, f, indent=4)
+        print(f.name)
+
+else:
+    raise IOError("Not a file: ", filepath)

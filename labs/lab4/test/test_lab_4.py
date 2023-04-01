@@ -1,10 +1,14 @@
+import json
 import os
 import stat
 import sys
 from pathlib import Path
+
+import pytest
 import pytest_mock
 
 from labs.lab4.lab4_2 import get_path_contents, is_exe_posix, is_executable, is_exe_windows
+import labs.lab4.lab4_3 as lab_3
 
 
 class TestPrintExecutable:
@@ -79,3 +83,63 @@ class TestPrintExecutable:
         mocker.patch('labs.lab4.lab4_2.get_path_directories',
                            return_value=[r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4"])
         print(get_path_contents(include_execs=False))
+
+
+class TestAnalyseFile:
+
+    @pytest.fixture
+    def example_file(self, tmp_path):
+        file = tmp_path / "words.txt"
+        file.write_text("World is big\nPython is great")
+        return file
+
+    def test_run_analysis(self, example_file):
+        output = lab_3.run_analysis(str(example_file))
+        with open(output) as f:
+            json_output = json.load(f)
+        expected = {'filepath': str(example_file),
+        'n_of_lines': 2,
+        'max_char': 'i',
+        'max_word': 'is',
+        'n_words': 6,
+        'n_chars': 23}
+        assert json_output == expected
+
+    def test_run_nonexisting_analysis(self):
+        not_existing = "\\"
+        output = lab_3.run_analysis(not_existing)
+        assert output == ""
+
+    def test_traverse_files(self):
+        files = []
+        func = lambda f: files.append(f)
+        _dir = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\input_data"
+        lab_3.traverse_files(_dir, func)
+        assert files == ['supernova.txt', 'zenofpython.txt']
+
+
+    @pytest.fixture
+    def dir_to_analyze(self, tmp_path):
+        _dir = tmp_path / "to_analyze"
+        _dir.mkdir()
+        file = _dir / "file1.txt"
+        file.write_text("World is big\nPython is great")
+        file = _dir / "file2.txt"
+        file.write_text("Mamma mia\nItaliana")
+        subdir = _dir / "sub_to_analyze"
+        subdir.mkdir()
+        file = subdir / "file3.txt"
+        file.write_text("To be\nOr Not\nto be")
+        return _dir
+
+    # TODO : write this test
+    def test_run_files_analyses(self, dir_to_analyze):
+
+        expected = [{'filepath': str(dir_to_analyze / 'file1.txt'), 'n_of_lines': 2, 'max_char': 'i', 'max_word': 'is', 'n_words': 6, 'n_chars': 23},
+                    {'filepath': str(dir_to_analyze / 'file2.txt'), 'n_of_lines': 2, 'max_char': 'a', 'max_word': 'Mamma', 'n_words': 3, 'n_chars': 16},
+                    {'filepath': str(dir_to_analyze / 'sub_to_analyze\\file3.txt'), 'n_of_lines': 3, 'max_char': 'o', 'max_word': 'be', 'n_words': 6, 'n_chars': 13}]
+
+        actual = lab_3.run_files_analyses(dir_to_analyze)
+
+        assert actual == expected
+
