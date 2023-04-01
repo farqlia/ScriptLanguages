@@ -46,7 +46,10 @@ class TestPrintExecutable:
 
     def test_get_path_folders_and_execs(self):
         dirs_and_execs = get_path_contents(include_execs=True)
-        assert dirs_and_execs["C:\\Users\\julia\\anaconda3\\envs\\ScriptLanguages"] == ['python.exe', 'pythonw.exe']
+        assert dirs_and_execs[Path("C:\\Users\\julia\\anaconda3\\envs\\ScriptLanguages")] == [
+            Path('C:/Users/julia/anaconda3/envs/ScriptLanguages/python.exe'),
+            Path('C:/Users/julia/anaconda3/envs/ScriptLanguages/pythonw.exe')
+        ]
 
     def test_get_path_folders(self):
         dirs = get_path_contents(False)
@@ -54,13 +57,13 @@ class TestPrintExecutable:
             print(dir)
 
     def filter_exe_windows(self, dir_path):
-        return list(filter(is_exe_windows, os.listdir(dir_path))) if Path(dir_path).is_dir() else []
+        return list(filter(is_exe_windows, list(dir_path.iterdir()))) if Path(dir_path).is_dir() else []
 
     def filter_exe_posix(self, dir_path):
-        return list(filter(is_exe_posix, os.listdir(dir_path))) if Path(dir_path).is_dir() else []
+        return list(filter(is_exe_posix, list(dir_path.iterdir()))) if Path(dir_path).is_dir() else []
 
     def test_mock_print_path_folders_and_files(self):
-        _dir = "C:\Windows\system32"
+        _dir = Path("C:\Windows\system32")
         content_windows = self.filter_exe_windows(_dir)
         print(content_windows)
         content_posix = self.filter_exe_posix(_dir)
