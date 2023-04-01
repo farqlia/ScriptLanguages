@@ -16,7 +16,9 @@ def is_exe_windows(filepath):
 def is_exe_posix(filepath):
     # Can also do stat.S_IXGRP, stat.S_IXUSR, stat.S_IXOTH for
     # execute permissions for others
-    return os.stat(filepath).st_mode & stat.S_IXUSR
+    mode = os.stat(filepath).st_mode
+    print(stat.filemode(mode))
+    return mode & stat.S_IXUSR
     # return os.access(filepath, os.X_OK)
 
 

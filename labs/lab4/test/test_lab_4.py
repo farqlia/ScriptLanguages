@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 import pytest_mock
 
-from labs.lab4.lab4_2 import get_path_contents, is_exe_posix
+from labs.lab4.lab4_2 import get_path_contents, is_exe_posix, is_executable, is_exe_windows
 
 
 class TestPrintExecutable:
@@ -16,6 +16,11 @@ class TestPrintExecutable:
     def test_print_os_separator(self):
         print(os.pathsep)
 
+    def text_posix_exe(self):
+        executable = Path(r"C:\Users\julia\anaconda3\bin\nvlink.exe")
+        assert is_exe_posix(executable)
+
+
     def test_if_executable(self):
         not_executable = Path(r"C:\Users\julia\anaconda3\bin\nvcc.profile")
         executable = Path(r"C:\Users\julia\anaconda3\bin\nvlink.exe")
@@ -24,14 +29,23 @@ class TestPrintExecutable:
         assert os.access(executable, os.X_OK)
 
     def test_if_posix_exe(self):
-        print(os.stat(r"C:\Users\julia\anaconda3\bin\nvlink.exe").st_mode & stat.S_IXUSR)
-        print(os.stat(r"C:\Users\julia\anaconda3\bin\nvlink.exe").st_mode & stat.S_IXGRP)
-        print(os.stat(r"C:\Users\julia\anaconda3\bin\nvlink.exe").st_mode & stat.S_IXOTH)
-        print(is_exe_posix(r"C:\Users\julia\anaconda3\bin\nvlink.exe"))
+        executable = Path(r"C:\Users\julia\anaconda3\bin\nvlink.exe")
+        print(os.stat(executable).st_mode & stat.S_IXUSR)
+        print(os.stat(executable).st_mode & stat.S_IXGRP)
+        print(os.stat(executable).st_mode & stat.S_IXOTH)
+        print(stat.filemode(os.stat(executable).st_mode))
+
+        not_executable = Path(r"C:\Users\julia\anaconda3\bin\nvcc.profile")
+        print(os.stat(not_executable).st_mode & stat.S_IXUSR)
+        print(os.stat(not_executable).st_mode & stat.S_IXGRP)
+        print(os.stat(not_executable).st_mode & stat.S_IXOTH)
+        print(stat.filemode(os.stat(not_executable).st_mode))
+
+        assert is_exe_posix(executable)
+        assert not is_exe_posix(not_executable)
 
     def test_get_path_folders_and_execs(self):
         dirs_and_execs = get_path_contents(include_execs=True)
-
         assert dirs_and_execs["C:\\Users\\julia\\anaconda3\\envs\\ScriptLanguages"] == ['python.exe', 'pythonw.exe']
 
     def test_get_path_folders(self):
@@ -39,10 +53,19 @@ class TestPrintExecutable:
         for dir in dirs:
             print(dir)
 
-    def test_mock_print_path_folders_and_files(self, mocker):
-        mocker.patch('labs.lab4.lab4_2.is_executable',
-                          return_value=True)
-        print(get_path_contents(include_execs=True))
+    def filter_exe_windows(self, dir_path):
+        return list(filter(is_exe_windows, os.listdir(dir_path))) if Path(dir_path).is_dir() else []
+
+    def filter_exe_posix(self, dir_path):
+        return list(filter(is_exe_posix, os.listdir(dir_path))) if Path(dir_path).is_dir() else []
+
+    def test_mock_print_path_folders_and_files(self):
+        _dir = "C:\Windows\system32"
+        content_windows = self.filter_exe_windows(_dir)
+        print(content_windows)
+        content_posix = self.filter_exe_posix(_dir)
+        print(content_posix)
+
 
     def test_mock_print_path_folders_and_execs(self, mocker):
         mocker.patch('labs.lab4.lab4_2.get_path_directories',
