@@ -9,6 +9,7 @@ import pytest_mock
 
 from labs.lab4.lab4_2 import get_path_contents, is_exe_posix, is_executable, is_exe_windows
 import labs.lab4.lab4_3 as lab_3
+import labs.lab4.lab4_4a as lab_4a
 
 
 class TestPrintExecutable:
@@ -142,4 +143,17 @@ class TestAnalyseFile:
         actual = lab_3.run_files_analyses(dir_to_analyze)
 
         assert actual == expected
+
+
+class TestCreateArchive:
+
+    def test_get_user_home(self):
+        assert "julia" == os.environ['USERNAME']
+        assert r"C:\Users\julia" == os.path.expanduser("~" + os.environ['USERNAME'])
+
+    def test_if_dir_name_format_is_correct(self, tmp_path):
+        _dir = lab_4a.create_archive_name("mydir", "csv")
+        _dir = tmp_path / _dir
+        _dir.mkdir()
+        assert _dir.is_dir()
 
