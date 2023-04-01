@@ -11,7 +11,7 @@ import pytest_mock
 
 from labs.lab4.lab4_2 import get_path_contents, is_exe_posix, is_executable, is_exe_windows
 import labs.lab4.lab4_3 as lab_3
-import labs.lab4.lab4_4a as lab_4a
+import labs.lab4.lab4_4 as lab_4a
 
 
 class TestPrintExecutable:
@@ -132,7 +132,7 @@ class TestAnalyseFile:
         func = lambda f: files.append(f)
         _dir = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\input_data"
         lab_3.traverse_files(_dir, func)
-        assert files == ['supernova.txt', 'zenofpython.txt']
+        assert files == ['supernova.txt', 'zenofpython.txt', 'irish_airman_death']
 
 
     # TODO : write this test
@@ -153,25 +153,11 @@ class TestCreateArchive:
         assert "julia" == os.environ['USERNAME']
         assert r"C:\Users\julia" == os.path.expanduser("~" + os.environ['USERNAME'])
 
-    def test_if_dir_name_format_is_correct(self, tmp_path):
-        _dir = lab_4a.create_archive_name("mydir", "csv")
-        _dir = tmp_path / _dir
-        _dir.mkdir()
-        assert _dir.is_dir()
-
     def test_create_tar_archive_with_default_backup_dir(self, dir_to_analyze):
         assert dir_to_analyze.is_dir()
         tar_archive = lab_4a.TarArchive(dir_to_analyze)
         assert tar_archive.archive()
-        assert tar_archive.validate()
-
-        print(tar_archive.archive_path)
-
-        # assert tar_archive.archive_path.is_dir()
-
-        # assert
-        # backup_dir = lab_4a.get_backups_directory()
-        # print(list(os.listdir(backup_dir)))
+        assert tar_archive.archive_path.exists()
 
     def test_create_tar_archive_with_defined_backup_dir(self, dir_to_analyze, tmp_path):
 
@@ -190,13 +176,12 @@ class TestCreateArchive:
         tar_archive = lab_4a.TarArchive(_subdir)
         assert tar_archive.archive()
 
-        with open(lab_4a.archive_history_path, newline='') as f:
+        with open(lab_4a.get_archive_history_path(), newline='') as f:
             reader = csv.DictReader(f, lab_4a.FIELDNAMES)
-            for row in reader:
-                print(json.dumps(row, indent=4))
-        #print(tar_archive.archive())
-        #assert tar_archive.validate()
-        #print(tar_archive.archive_path)
+            rows = list(reader)
+
+        assert rows[0]['Full Directory Path'].endswith('to_analyze')
+        assert rows[1]['Full Directory Path'].endswith('\\to_analyze\\sub_to_analyze')
 
 
 class TestTarRestore:
@@ -211,7 +196,6 @@ class TestTarRestore:
         yield tar_archive.archive_path
 
         shutil.rmtree(backup_dir)
-        os.remove(lab_4a.archive_history_path)
 
     def test_restore_archive(self, archive_test, tmp_path):
 
@@ -225,16 +209,14 @@ class TestTarRestore:
         print(restored_archive.dir_path)
 
         assert not restored_archive.archive_path.exists()
-
-        print(os.listdir(restored_archive.dir_path))
-
+        assert (restore_to / "to_analyze").exists()
 
     def test_remove_from_archive_history(self, archive_test, tmp_path):
 
         restore_to = tmp_path / 'data'
         restore_to.mkdir()
 
-        with open(lab_4a.archive_history_path, newline='') as f:
+        with open(lab_4a.get_archive_history_path(), newline='') as f:
             reader = csv.DictReader(f, lab_4a.FIELDNAMES)
             for row in reader:
                 print(json.dumps(row, indent=4))
@@ -244,11 +226,13 @@ class TestTarRestore:
 
         print("----- AFTER RESTORING ----------")
 
-        with open(lab_4a.archive_history_path, newline='') as f:
+        with open(lab_4a.get_archive_history_path(), newline='') as f:
             reader = csv.DictReader(f, lab_4a.FIELDNAMES)
             for row in reader:
                 print(json.dumps(row, indent=4))
 
+    def test_open_archive_history(self):
+        lab_4a.print_formatted_archive_history()
 
 
 

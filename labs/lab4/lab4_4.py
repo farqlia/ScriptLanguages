@@ -18,21 +18,22 @@ def get_user_home():
 
 
 def get_backups_directory():
-    backup_dir = os.environ.get('BACKUPS_DIR', os.path.join(get_user_home(), "backups"))
+    backup_dir = os.environ.get('BACKUPS_DIR', os.path.join(get_user_home(), ".backups"))
     backup_dir_path = Path(backup_dir)
     # Creates the backup directory and all subdirectories if needed
     backup_dir_path.mkdir(parents=True, exist_ok=True)
     return backup_dir_path
 
 
-archive_history_path = Path(get_backups_directory()) / "archive_history.csv"
+def get_archive_history_path():
+    return Path(get_backups_directory()) / "archive_history.csv"
 
 
 # This must be called
 def create_archive_history_file():
 
-    if not archive_history_path.exists():
-        with open(archive_history_path, mode='w', newline='') as f:
+    if not get_archive_history_path().exists():
+        with open(get_archive_history_path(), mode='w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
             writer.writeheader()
 
@@ -52,14 +53,11 @@ class Archive(abc.ABC):
         self.archive_path = Path()
         self.ext = ext
 
-    def validate(self):
-        return self.dir_path.is_dir()
-
     def create_archive_name(self):
         return get_backups_directory() / f"{self.creation_date}-{self.dir_path.stem}.{self.ext}"
 
     def write_to_archive_history(self):
-        with open(archive_history_path, mode='a', newline='') as f:
+        with open(get_archive_history_path(), mode='a', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
             writer.writerow({'Date': self.creation_date,
                              'Full Directory Path': str(self.dir_path),
@@ -77,19 +75,19 @@ class Restore(abc.ABC):
         self.archive_path = Path()
         self.ext = ext
 
-    def validate(self):
-        return self.dir_path.is_dir()
-
     def remove_from_archive_history(self, index):
 
         archive_history_path_temp = get_backups_directory() / "archive_history_temp.csv"
 
-        with open(archive_history_path, newline='') as f_read, \
+        with open(get_archive_history_path(), newline='') as f_read, \
                 open(archive_history_path_temp, mode='w', newline='') as f_write:
             reader = csv.DictReader(f_read, fieldnames=FIELDNAMES)
             writer = csv.DictWriter(f_write, fieldnames=FIELDNAMES)
-            # We skip the header
-            n_records = -1
+
+            next(reader)
+            writer.writeheader()
+
+            n_records = 0
             for row in reader:
                 if n_records == index:
                     self.archive_path = get_backups_directory() / (row['Archive Name'] + '.' + self.ext)
@@ -97,7 +95,7 @@ class Restore(abc.ABC):
                     writer.writerow(row)
                 n_records += 1
 
-        archive_history_path_temp.replace(archive_history_path)
+        archive_history_path_temp.replace(get_archive_history_path())
 
         return self.archive_path
 
@@ -108,13 +106,11 @@ class TarArchive(Archive):
         super().__init__(dir_path=dir_path, ext='tar')
 
     def archive(self):
-        if self.validate():
-            self.archive_path = Path(self.create_archive_name())
-            process = run(['tar', '-cvzf', self.archive_path, self.dir_path],
-                          text=True)
-            self.write_to_archive_history()
-            return process.returncode == 0
-        return False
+        self.archive_path = Path(self.create_archive_name())
+        process = run(['tar', '-cvzf', self.archive_path, self.dir_path],
+                      text=True)
+        self.write_to_archive_history()
+        return process.returncode == 0
 
 
 class TarRestore(Restore):
@@ -123,16 +119,30 @@ class TarRestore(Restore):
         super().__init__(dir_path, 'tar')
 
     def restore(self, index):
-        if self.validate():
-            self.archive_path = get_backups_directory() / self.remove_from_archive_history(index)
-            process = run(['tar', '-zxvf', self.archive_path, '-C', self.dir_path],
-                          text=True)
-            os.remove(self.archive_path)
-            return process.returncode == 0
-        return False
+        self.archive_path = get_backups_directory() / self.remove_from_archive_history(index)
+        process = run(['tar', '-zxvf', self.archive_path, '-C', self.dir_path],
+                      text=True)
+        # os.remove(self.archive_path)
+        return process.returncode == 0
 
 
+def open_archive_history(reverse=False):
+
+    backups = []
+    with open(get_archive_history_path(), newline='') as f:
+        reader = csv.DictReader(f, fieldnames=FIELDNAMES)
+        next(reader)
+        for row in reader:
+            backups.append(row)
+
+    backups = list(zip(range(len(backups)), backups))
+    return backups if not reverse else backups[::-1]
 
 
+def print_formatted_archive_history():
+
+    history = open_archive_history(reverse=True)
+    for (i, row) in history:
+        print(f"[{i}], {row}")
 
 
