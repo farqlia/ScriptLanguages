@@ -2,11 +2,11 @@ import json
 import os
 import sys
 from pathlib import Path
-from labs.lab4.lab4_1 import any_argument
+from labs.lab4.src.lab4_1 import any_argument
 import subprocess
 import logging
 
-FILE_PATH = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\analyze_file.py"
+FILE_PATH = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\src\analyze_file.py"
 
 
 def get_dir_path():

@@ -10,7 +10,7 @@ def get_path_listing():
 
 
 def is_exe_windows(filepath):
-    return filepath.suffix == "exe"
+    return filepath.suffix == ".exe"
 
 
 def is_exe_posix(filepath):
@@ -31,7 +31,7 @@ def get_path_contents(include_execs=False):
     dirs = get_path_listing()
     if include_execs:
         is_exe = is_executable()
-        dirs = {_dir: list(map(lambda p: p.name, filter(is_exe, list(_dir.iterdir())))) for _dir in dirs if _dir.is_dir()}
+        dirs = {_dir: list(map(lambda p: p.stem, filter(is_exe, list(_dir.iterdir())))) for _dir in dirs if _dir.is_dir()}
     return dirs
 
 

@@ -3,15 +3,13 @@ import json
 import os
 import shutil
 import stat
-import sys
 from pathlib import Path
 
 import pytest
-import pytest_mock
 
-from labs.lab4.lab4_2 import get_path_contents, is_exe_posix, is_executable, is_exe_windows
-import labs.lab4.lab4_3 as lab_3
-import labs.lab4.lab4_4 as lab_4a
+from labs.lab4.src.lab4_2 import get_path_contents, is_exe_posix, is_exe_windows
+import labs.lab4.src.lab4_3 as lab_3
+import labs.lab4.src.lab4_4 as lab_4a
 
 
 class TestPrintExecutable:
@@ -54,8 +52,8 @@ class TestPrintExecutable:
     def test_get_path_folders_and_execs(self):
         dirs_and_execs = get_path_contents(include_execs=True)
         assert dirs_and_execs[Path("C:\\Users\\julia\\anaconda3\\envs\\ScriptLanguages")] == [
-            Path('C:/Users/julia/anaconda3/envs/ScriptLanguages/python.exe'),
-            Path('C:/Users/julia/anaconda3/envs/ScriptLanguages/pythonw.exe')
+            'python',
+            'pythonw'
         ]
 
     def test_get_path_folders(self):
@@ -81,6 +79,7 @@ class TestPrintExecutable:
         mocker.patch('labs.lab4.lab4_2.get_path_directories',
                           return_value=[r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs"])
         print(get_path_contents(include_execs=True))
+
 
     def test_mock_print_path_folders(self, mocker):
         mocker.patch('labs.lab4.lab4_2.get_path_directories',
@@ -111,6 +110,7 @@ class TestAnalyseFile:
         return file
 
     def test_run_analysis(self, example_file):
+        print(str(example_file))
         output = lab_3.run_analysis(str(example_file))
         with open(output) as f:
             json_output = json.load(f)

@@ -1,11 +1,9 @@
 import abc
 import os
-import shutil
 from pathlib import Path
 import csv
 from subprocess import run
 
-import labs.lab4.lab4_3 as lab4_3
 import datetime
 
 FORMAT = "%Y-%m-%d-%H-%M-%S"
