@@ -10,7 +10,7 @@ import pytest
 from labs.lab4.src.lab4_2 import get_path_contents
 import labs.lab4.src.lab4_2 as lab_2
 import labs.lab4.src.lab4_3 as lab_3
-import labs.lab4.src.lab4_4 as lab_4a
+import labs.lab4.src.lab4_4a as lab_4a
 
 
 class TestPrintExecutable:
@@ -161,6 +161,7 @@ class TestCreateArchive:
         assert r"C:\Users\julia" == os.path.expanduser("~" + os.environ['USERNAME'])
 
     def test_create_tar_archive_with_default_backup_dir(self, dir_to_analyze):
+        lab_4a.create_archive_history_file()
         assert dir_to_analyze.is_dir()
         tar_archive = lab_4a.TarArchive(dir_to_analyze)
         assert tar_archive.archive()
@@ -174,6 +175,7 @@ class TestCreateArchive:
         assert not tar_archive.archive_path.exists()
 
     def test_create_tar_archive_with_defined_backup_dir(self, dir_to_analyze, tmp_path):
+        lab_4a.create_archive_history_file()
 
         backup_dir = tmp_path / "backup"
         os.environ['BACKUPS_DIR'] = str(backup_dir)
@@ -205,8 +207,10 @@ class TestTarRestore:
         backup_dir = tmp_path / "backup_test"
         os.environ['BACKUPS_DIR'] = str(backup_dir)
 
+        lab_4a.create_archive_history_file()
+
         tar_archive = lab_4a.TarArchive(dir_to_analyze)
-        tar_archive._archive()
+        tar_archive.archive()
         yield tar_archive.archive_path
 
         shutil.rmtree(backup_dir)
@@ -223,30 +227,21 @@ class TestTarRestore:
         print(restored_archive.dir_path)
 
         assert not restored_archive.archive_path.exists()
-        assert (restore_to / "to_analyze").exists()
+        assert set(os.listdir(restore_to)) == {"file1.txt", "file2.txt", "sub_to_analyze"}
 
     def test_remove_from_archive_history(self, archive_test, tmp_path):
 
         restore_to = tmp_path / 'data'
         restore_to.mkdir()
 
-        with open(lab_4a.get_archive_history_path(), newline='') as f:
-            reader = csv.DictReader(f, lab_4a.FIELDNAMES)
-            for row in reader:
-                print(json.dumps(row, indent=4))
-
         restored_archive = lab_4a.TarRestore(restore_to)
         restored_archive.remove_from_archive_history(0)
 
-        print("----- AFTER RESTORING ----------")
-
         with open(lab_4a.get_archive_history_path(), newline='') as f:
             reader = csv.DictReader(f, lab_4a.FIELDNAMES)
-            for row in reader:
-                print(json.dumps(row, indent=4))
+            next(reader)
+            assert next(reader, True)
 
-    def test_open_archive_history(self):
-        lab_4a.print_formatted_archive_history()
 
 
 
