@@ -27,11 +27,10 @@ def is_executable():
     return is_exe_windows if os.name == 'nt' else is_exe_posix
 
 
-def get_path_contents(include_execs=False):
+def get_path_contents(include_execs=False, method=is_executable()):
     dirs = get_path_listing()
     if include_execs:
-        is_exe = is_executable()
-        dirs = {_dir: list(map(lambda p: p.stem, filter(is_exe, list(_dir.iterdir())))) for _dir in dirs if _dir.is_dir()}
+        dirs = {_dir: list(map(lambda p: p.stem, filter(method, list(_dir.iterdir())))) for _dir in dirs if _dir.is_dir()}
     return dirs
 
 

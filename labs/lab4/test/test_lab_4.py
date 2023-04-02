@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from labs.lab4.src.lab4_2 import get_path_contents, is_exe_posix, is_exe_windows
+import labs.lab4.src.lab4_2 as lab_2
 import labs.lab4.src.lab4_3 as lab_3
 import labs.lab4.src.lab4_4 as lab_4a
 
@@ -60,6 +61,26 @@ class TestPrintExecutable:
         dirs = get_path_contents(False)
         for dir in dirs:
             print(dir)
+
+    def test_two_ways_for_testing_for_executable(self):
+        way1 = lab_2.get_path_contents(include_execs=True, method=lambda p: shutil.which(p.stem))
+        way = lab_2.get_path_contents(include_execs=True)
+
+        print(way[Path('C:\Windows\system32')])
+        key = Path('C:\Windows\system32')
+        assert set(way1[key]) == set(way[key])
+
+    def filter_with_shutil(self, dir_path):
+        # for file in os.listdir(dir_path):
+        #    print(file, " ", shutil.which(file.stem))
+        return list(map(lambda f: Path(f).stem, filter(lambda f: bool(shutil.which(f)), os.listdir(dir_path))))
+
+    def test_filter(self):
+        filtered = self.filter_with_shutil(Path("C:\Windows\system32"))
+        way = lab_2.get_path_contents(include_execs=True)
+
+        assert set(way[Path('C:\Windows\system32')]) == set(filtered)
+
 
     def filter_exe_windows(self, dir_path):
         return list(filter(is_exe_windows, list(dir_path.iterdir()))) if Path(dir_path).is_dir() else []
