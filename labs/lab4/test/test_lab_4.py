@@ -166,6 +166,13 @@ class TestCreateArchive:
         assert tar_archive.archive()
         assert tar_archive.archive_path.exists()
 
+    def test_unsuccessful_archive(self):
+        non_existing_dir = Path(r"C:\julia\not_existing")
+        assert not non_existing_dir.exists()
+        tar_archive = lab_4a.TarArchive(non_existing_dir)
+        assert not tar_archive.archive()
+        assert not tar_archive.archive_path.exists()
+
     def test_create_tar_archive_with_defined_backup_dir(self, dir_to_analyze, tmp_path):
 
         backup_dir = tmp_path / "backup"
@@ -199,7 +206,7 @@ class TestTarRestore:
         os.environ['BACKUPS_DIR'] = str(backup_dir)
 
         tar_archive = lab_4a.TarArchive(dir_to_analyze)
-        tar_archive.archive()
+        tar_archive._archive()
         yield tar_archive.archive_path
 
         shutil.rmtree(backup_dir)

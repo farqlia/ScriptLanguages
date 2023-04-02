@@ -1,5 +1,6 @@
 import abc
 import os
+import shutil
 from pathlib import Path
 import csv
 from subprocess import run
@@ -27,7 +28,6 @@ def get_archive_history_path():
     return Path(get_backups_directory()) / "archive_history.csv"
 
 
-# This must be called
 def create_archive_history_file():
 
     if not get_archive_history_path().exists():
@@ -36,20 +36,31 @@ def create_archive_history_file():
             writer.writeheader()
 
 
+create_archive_history_file()
+
+
 class Archive(abc.ABC):
 
-    create_archive_history_file()
-
     @abc.abstractmethod
-    def archive(self):
+    def _archive(self):
         pass
 
-    # If unpack
     def __init__(self, dir_path, ext):
         self.creation_date = datetime.datetime.now().strftime(FORMAT)
         self.dir_path = dir_path
         self.archive_path = Path()
         self.ext = ext
+
+    def archive(self):
+        self.archive_path = Path(self.create_archive_name())
+        result = self._archive()
+
+        if result:
+            self.write_to_archive_history()
+        else:
+            os.remove(self.archive_path)
+
+        return result
 
     def create_archive_name(self):
         return get_backups_directory() / f"{self.creation_date}-{self.dir_path.stem}.{self.ext}"
@@ -101,13 +112,12 @@ class Restore(abc.ABC):
 class TarArchive(Archive):
 
     def __init__(self, dir_path):
-        super().__init__(dir_path=dir_path, ext='tar')
+        super().__init__(dir_path=dir_path, ext='tar.gz')
 
-    def archive(self):
-        self.archive_path = Path(self.create_archive_name())
-        process = run(['tar', '-cvzf', self.archive_path, self.dir_path],
+    def _archive(self):
+        process = run(['tar', '-cvzf', self.archive_path, "-C",
+                       self.dir_path, "."],
                       text=True)
-        self.write_to_archive_history()
         return process.returncode == 0
 
 

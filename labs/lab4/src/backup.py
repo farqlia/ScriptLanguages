@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     if _dir:
         tar_archive = lab4.TarArchive(Path(_dir))
-        tar_archive.archive()
+        tar_archive._archive()
 
 
 
