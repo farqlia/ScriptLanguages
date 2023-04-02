@@ -9,7 +9,7 @@ import logging
 FILE_PATH = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\src\analyze_file.py"
 
 
-def get_dir_path():
+def get_dir_path_from_args():
     _dir = ""
     if any_argument():
         _dir = Path(sys.argv[1])
@@ -28,19 +28,9 @@ def run_analysis(filepath):
 
 
 def traverse_files(directory, file_callback):
-    for _, _, files in os.walk(directory):
+    for dir_path, _, files in os.walk(directory):
         for file in files:
-            file_callback(file)
-
-
-def walktree(top, callback):
-    for path in top.iterdir():
-        if path.is_dir():
-            walktree(path, callback)
-        elif path.is_file():
-            callback(path)
-        else:
-            logging.error(f"Skipping {path}")
+            file_callback(os.path.join(dir_path, file))
 
 
 def run_files_analyses(dir_path):
@@ -48,12 +38,11 @@ def run_files_analyses(dir_path):
     analyses = []
 
     def add_to_list(file):
-        output_file = run_analysis(str(file))
-        if Path(output_file).is_file():
-            with open(output_file) as f:
-                analyses.append(json.load(f))
+        output = run_analysis(file)
+        if output:
+            analyses.append(json.loads(output))
 
-    walktree(dir_path, add_to_list)
+    traverse_files(dir_path, add_to_list)
 
     return analyses
 
@@ -69,7 +58,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename=f"{Path(__file__).stem}_logging.txt",
                         encoding='utf-8', level=logging.DEBUG)
 
-    _dir = get_dir_path()
+    _dir = get_dir_path_from_args()
 
     if _dir:
         print_results(run_files_analyses(_dir))

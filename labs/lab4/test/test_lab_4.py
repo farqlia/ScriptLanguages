@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from labs.lab4.src.lab4_2 import get_path_contents, is_exe_posix, is_exe_windows
+from labs.lab4.src.lab4_2 import get_path_contents
 import labs.lab4.src.lab4_2 as lab_2
 import labs.lab4.src.lab4_3 as lab_3
 import labs.lab4.src.lab4_4 as lab_4a
@@ -22,11 +22,6 @@ class TestPrintExecutable:
     def test_print_os_separator(self):
         print(os.pathsep)
 
-    def text_posix_exe(self):
-        executable = Path(r"C:\Users\julia\anaconda3\bin\nvlink.exe")
-        assert is_exe_posix(executable)
-
-
     def test_if_executable(self):
         not_executable = Path(r"C:\Users\julia\anaconda3\bin\nvcc.profile")
         executable = Path(r"C:\Users\julia\anaconda3\bin\nvlink.exe")
@@ -35,20 +30,33 @@ class TestPrintExecutable:
         assert os.access(executable, os.X_OK)
 
     def test_if_posix_exe(self):
+
+        # Shutil checks whether a command prompted in cmd with a given name
+        # would run - if yes
+
         executable = Path(r"C:\Users\julia\anaconda3\bin\nvlink.exe")
         print(os.stat(executable).st_mode & stat.S_IXUSR)
         print(os.stat(executable).st_mode & stat.S_IXGRP)
         print(os.stat(executable).st_mode & stat.S_IXOTH)
         print(stat.filemode(os.stat(executable).st_mode))
 
-        not_executable = Path(r"C:\Users\julia\anaconda3\bin\nvcc.profile")
+        assert shutil.which(executable.stem)
+
+        executable = Path(r"C:\Users\julia\anaconda3\bin\nvcc.exe")
+        print(os.stat(executable).st_mode & stat.S_IXUSR)
+        print(os.stat(executable).st_mode & stat.S_IXGRP)
+        print(os.stat(executable).st_mode & stat.S_IXOTH)
+        print(stat.filemode(os.stat(executable).st_mode))
+
+        assert shutil.which(executable.stem)
+
+        not_executable = Path(r"C:\Users\julia\anaconda3\README")
         print(os.stat(not_executable).st_mode & stat.S_IXUSR)
         print(os.stat(not_executable).st_mode & stat.S_IXGRP)
         print(os.stat(not_executable).st_mode & stat.S_IXOTH)
         print(stat.filemode(os.stat(not_executable).st_mode))
 
-        assert is_exe_posix(executable)
-        assert not is_exe_posix(not_executable)
+        assert not shutil.which(not_executable.stem)
 
     def test_get_path_folders_and_execs(self):
         dirs_and_execs = get_path_contents(include_execs=True)
@@ -62,14 +70,6 @@ class TestPrintExecutable:
         for dir in dirs:
             print(dir)
 
-    def test_two_ways_for_testing_for_executable(self):
-        way1 = lab_2.get_path_contents(include_execs=True, method=lambda p: shutil.which(p.stem))
-        way = lab_2.get_path_contents(include_execs=True)
-
-        print(way[Path('C:\Windows\system32')])
-        key = Path('C:\Windows\system32')
-        assert set(way1[key]) == set(way[key])
-
     def filter_with_shutil(self, dir_path):
         # for file in os.listdir(dir_path):
         #    print(file, " ", shutil.which(file.stem))
@@ -80,20 +80,6 @@ class TestPrintExecutable:
         way = lab_2.get_path_contents(include_execs=True)
 
         assert set(way[Path('C:\Windows\system32')]) == set(filtered)
-
-
-    def filter_exe_windows(self, dir_path):
-        return list(filter(is_exe_windows, list(dir_path.iterdir()))) if Path(dir_path).is_dir() else []
-
-    def filter_exe_posix(self, dir_path):
-        return list(filter(is_exe_posix, list(dir_path.iterdir()))) if Path(dir_path).is_dir() else []
-
-    def test_mock_print_path_folders_and_files(self):
-        _dir = Path("C:\Windows\system32")
-        content_windows = self.filter_exe_windows(_dir)
-        print(content_windows)
-        content_posix = self.filter_exe_posix(_dir)
-        print(content_posix)
 
 
     def test_mock_print_path_folders_and_execs(self, mocker):
@@ -122,6 +108,7 @@ def dir_to_analyze(tmp_path):
     file.write_text("To be\nOr Not\nto be")
     return _dir
 
+
 class TestAnalyseFile:
 
     @pytest.fixture
@@ -133,8 +120,7 @@ class TestAnalyseFile:
     def test_run_analysis(self, example_file):
         print(str(example_file))
         output = lab_3.run_analysis(str(example_file))
-        with open(output) as f:
-            json_output = json.load(f)
+        json_output = json.loads(output)
         expected = {'filepath': str(example_file),
         'n_of_lines': 2,
         'max_char': 'i',
@@ -150,7 +136,7 @@ class TestAnalyseFile:
 
     def test_traverse_files(self):
         files = []
-        func = lambda f: files.append(f)
+        func = lambda f: files.append(Path(f).name)
         _dir = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\input_data"
         lab_3.traverse_files(_dir, func)
         assert files == ['supernova.txt', 'zenofpython.txt', 'irish_airman_death']

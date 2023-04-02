@@ -39,9 +39,7 @@ if __name__ == "__main__":
             'n_chars': n_chars
         }
 
-        with open(os.path.join(DATA_DIR, f"{filepath.stem}_stats.json"), mode='w') as f:
-            json.dump(stats, f, indent=4)
-            print(f.name)
+        print(json.dumps(stats, indent=4))
 
     else:
         raise IOError("Not a file: ", filepath)

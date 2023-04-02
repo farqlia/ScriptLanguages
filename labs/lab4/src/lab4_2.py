@@ -1,6 +1,6 @@
 import os
 import pathlib
-import stat
+import shutil
 import sys
 
 
@@ -9,28 +9,11 @@ def get_path_listing():
     return [pathlib.Path(elem) for elem in path.split(os.pathsep) if len(elem) > 0]
 
 
-def is_exe_windows(filepath):
-    return filepath.suffix == ".exe"
-
-
-def is_exe_posix(filepath):
-    # Can also do stat.S_IXGRP, stat.S_IXUSR, stat.S_IXOTH for
-    # execute permissions for others
-    mode = os.stat(filepath).st_mode
-    # print(stat.filemode(mode))
-    return mode & stat.S_IXUSR
-    # return os.access(filepath, os.X_OK)
-
-
-def is_executable():
-    # print("invoked")
-    return is_exe_windows if os.name == 'nt' else is_exe_posix
-
-
-def get_path_contents(include_execs=False, method=is_executable()):
+def get_path_contents(include_execs=False):
     dirs = get_path_listing()
     if include_execs:
-        dirs = {_dir: list(map(lambda p: p.stem, filter(method, list(_dir.iterdir())))) for _dir in dirs if _dir.is_dir()}
+        dirs = {_dir: list(map(lambda p: p.stem, filter(shutil.which, list(_dir.iterdir()))))
+                for _dir in dirs if _dir.is_dir()}
     return dirs
 
 
