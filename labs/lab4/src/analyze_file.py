@@ -2,8 +2,9 @@ import json
 import os
 import sys
 from pathlib import Path
+import os
 
-DATA_DIR = Path(r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\data")
+DATA_DIR = Path(__file__).parents[1].joinpath('data')
 
 if __name__ == "__main__":
 

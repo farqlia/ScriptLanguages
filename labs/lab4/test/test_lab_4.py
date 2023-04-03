@@ -7,10 +7,17 @@ from pathlib import Path
 
 import pytest
 
+from labs.lab4.src.analyze_file import DATA_DIR
 from labs.lab4.src.lab4_2 import get_path_contents
 import labs.lab4.src.lab4_2 as lab_2
 import labs.lab4.src.lab4_3 as lab_3
-import labs.lab4.src.lab4_4a as lab_4a
+import labs.lab4.src.lab4_4 as lab_4a
+
+
+def test_parent_dir():
+    print(Path(os.getcwd()).parent)
+    print(lab_3.FILE_PATH)
+    print(DATA_DIR)
 
 
 class TestPrintExecutable:
@@ -116,6 +123,10 @@ class TestAnalyseFile:
         file = tmp_path / "words.txt"
         file.write_text("World is big\nPython is great")
         return file
+
+    def test_path_pattern_match(self):
+        path = Path(r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\input_data.tar.gz")
+        assert path.match(".+{}")
 
     def test_run_analysis(self, example_file):
         print(str(example_file))

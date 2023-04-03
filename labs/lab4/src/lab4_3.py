@@ -6,7 +6,7 @@ from labs.lab4.src.lab4_1 import any_argument
 import subprocess
 import logging
 
-FILE_PATH = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab4\src\analyze_file.py"
+FILE_PATH = Path(__file__).parent.joinpath("analyze_file.py")
 
 
 def get_dir_path_from_args():
@@ -41,6 +41,8 @@ def run_files_analyses(dir_path):
         output = run_analysis(file)
         if output:
             analyses.append(json.loads(output))
+        # error logging
+        # else:
 
     traverse_files(dir_path, add_to_list)
 
@@ -58,10 +60,10 @@ if __name__ == "__main__":
     logging.basicConfig(filename=f"{Path(__file__).stem}_logging.txt",
                         encoding='utf-8', level=logging.DEBUG)
 
-    _dir = get_dir_path_from_args()
+    dir_to_analyse = get_dir_path_from_args()
 
-    if _dir:
-        print_results(run_files_analyses(_dir))
+    if dir_to_analyse:
+        print_results(run_files_analyses(dir_to_analyse))
     else:
-        logging.error(f"Not a directory: {_dir}")
+        logging.error(f"Not a directory: {dir_to_analyse}")
 

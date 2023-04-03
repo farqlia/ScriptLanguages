@@ -115,7 +115,12 @@ class Restore(abc.ABC):
 
     def restore(self, index):
         # Can add validation
-        self.archive_path = get_backups_directory() / self.remove_from_archive_history(index)
+        to_restore = self.remove_from_archive_history(index)
+        if to_restore: #and to_restore.match(f".+{self.ext}"):
+            self.archive_path = get_backups_directory() / to_restore
+        else:
+            return False
+
         result = False
         if self.archive_path.exists():
             result = self._restore(index)
