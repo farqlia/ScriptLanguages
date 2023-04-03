@@ -113,10 +113,14 @@ class Restore(abc.ABC):
         self.archive_path = Path()
         self.ext = ext
 
+    def set_to_restore_dir(self):
+        if not self.dir_path.is_dir():
+            self.dir_path = Path(os.getcwd())
+
     def restore(self, index):
         # Can add validation
         to_restore = self.remove_from_archive_history(index)
-        if to_restore: #and to_restore.match(f".+{self.ext}"):
+        if to_restore:
             self.archive_path = get_backups_directory() / to_restore
         else:
             return False

@@ -7,7 +7,11 @@ from labs.lab4.src.lab4_3 import get_dir_path_from_args
 
 def to_restore_dir():
     _dir = get_dir_path_from_args()
-    _dir = Path(os.getcwd()) if not _dir else _dir
+    if not _dir:
+        _dir = Path(os.getcwd())
+    else:
+        _dir = Path(_dir)
+        _dir = _dir if _dir.exists() else Path(os.getcwd())
     return _dir
 
 
