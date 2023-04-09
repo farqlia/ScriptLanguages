@@ -1,6 +1,7 @@
 import os
 import pathlib
 import shutil
+import stat
 import sys
 
 
@@ -12,7 +13,7 @@ def get_path_listing():
 def get_path_contents(include_execs=False):
     dirs = get_path_listing()
     if include_execs:
-        dirs = {_dir: list(map(lambda p: p.stem, filter(shutil.which, list(_dir.iterdir()))))
+        dirs = {_dir: list(map(lambda p: p.stem, filter(lambda f: os.stat(f).st_mode & stat.S_IXUSR, list(_dir.iterdir()))))
                 for _dir in dirs if _dir.is_dir()}
     return dirs
 

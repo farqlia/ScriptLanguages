@@ -1,0 +1,52 @@
+co to jest abstrakcja? branie pod uwagę to, co jest
+istotne w kontekście i zapomnienie tego, co nie jest
+istotne
+
+znaczenie - abstrakcja danych
+enkapsulacja (hermetyzacja) - ukrywanie danych, do pigułki
+
+składowe prywatne, składowe publiczne,
+poziomy dostępności
+dziedziczenie - mechanizm związany z generalizacją
+ukrócenie programiście definiowanie struktury
+zachowania - metody
+cechy - dane
+
+generalizacja - specjalizacja
+
+w pythonie wszystko jest obiektem
+typ też jest obiektem
+funkcja tez jest obiektem
+metody magiczne
+init - funkcja inicjalizująca, taki konstruktor
+można zaimplementować wielodziedziczenie
+metody mają co najmniej jeden parameter self,
+który odniosi się do instancji
+
+
+properties, która jest przypisywana jako atrybut
+
+nie ma enkapsulacji w pythonie
+issubclass
+wielość może wynikać z hierarchi
+
+delegacja do metod klasy bazowej, do metody, która
+została przedefiniowana
+
+wielodziedziczenie jest zabronione w wielu
+językach programowania
+
+do której wersji atrybutu się odwołujemy
+
+problem jest rozwiązany przez kolejność
+dziedziczonych klas w definicji klasy
+dziedziczącej
+
+abc to narzędzia do tworzenia abstrakcji
+liskov substitution principle
+
+polimorfizm nie musi być związany z dziedziczeniem
+
+__inti__ lepiej jest nazwany jako inicjalizator
+nic nie zwraca, ale tak naprawdę konstrukcję
+wykonuje __new__
