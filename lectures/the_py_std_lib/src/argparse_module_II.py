@@ -6,11 +6,11 @@ parser = argparse.ArgumentParser("COCO")
 parser.add_argument('--foo', action='store_true', help='foo help')
 subparses = parser.add_subparsers(help='sub-command help')
 
-parser_a = subparses.add_parser('a')
+parser_a = subparses.add_parser('pa')
 parser_a.add_argument('bar', type=int)
 
-parser_b = subparses.add_parser('b')
-parser_b.add_argument('--baz', choices='XYZ')
+parser_b = subparses.add_parser('pb')
+parser_b.add_argument('-b', '--baz', action='store_true')
 
-print(parser.parse_args(['a', '12']))
-print(parser.parse_args(['--foo', 'b', '--baz', 'Z']))
+print(parser.parse_args(['pa', '12']))
+print(parser.parse_args(['--foo', 'pb', '-b']))

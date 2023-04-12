@@ -1,3 +1,5 @@
+from argparse import Namespace
+
 import pandas as pd
 from pathlib import Path
 from os import getcwd
@@ -6,6 +8,7 @@ import re
 import labs.lab5.src.analyze_ssh_logs as analyze_ssh_logs
 from collections import namedtuple
 import time
+import labs.lab5.src.app as app
 
 DATA_DIR = Path(getcwd()).parent.joinpath('data')
 logs_link = ""
@@ -30,7 +33,7 @@ class TestParseEntry:
 
     @pytest.mark.parametrize("entry,expected",
                              [("Dec 10 07:13:43 LabSZ sshd[24227]: Failed password for root from 5.36.59.76 port 42393 ssh2"
-                               , {'month_day': 'Dec-10', 'time': time.strptime("07:13:43", "%H:%M:%S"),
+                               , {'month_day': 'Dec-10', 'time':"07:13:43",
                                   'host': 'LabSZ', 'pid': 24227,
                                   'message': 'Failed password for root from 5.36.59.76 port 42393 ssh2'})])
     def test_convert_to_namedtuple(self, entry, expected):
@@ -149,3 +152,11 @@ class TestMessageType:
     def test_others(self, entry):
         mess_type = analyze_ssh_logs.get_message_type(analyze_ssh_logs.parse_entry(entry))
         assert mess_type == analyze_ssh_logs.MessageType.OTHER
+
+
+def test_exec_command_formatting():
+    entry_log = analyze_ssh_logs.parse_entry("Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186")
+    nmsp = Namespace(**{'ipv4': True, 'users': True, 'mstype': True})
+    output = app.exec_commands(entry_log, nmsp)
+    # assert output == "Analyze: Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186" \
+      #                "\nIPv4 addresses: ['173.234.31.186']\nUsers: webmaster\nLog type: MessageType.INCORRECT_USERNAME"

@@ -1,5 +1,6 @@
 import re
 import time
+from sys import getsizeof
 from collections import namedtuple
 from enum import Enum
 
@@ -30,11 +31,14 @@ class MessageType(Enum):
     SUCCESSFUL_LOGIN = 5
     OTHER = 6
 
+    def format(self):
+        return self.name.replace(r"\w+", " ").lower()
+
 
 def parse_entry(entry):
     match = re.match(PATTERN, entry)
     return log_entry(month_day=f"{match.group('month')}-{match.group('day')}",
-                     time=time.strptime(match.group('time'), '%H:%M:%S'),
+                     time=match.group('time'),
                      host=match.group('host'),
                      pid=int(match.group('pid')),
                      message=match.group('message'))

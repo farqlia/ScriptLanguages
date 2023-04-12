@@ -4,3 +4,4 @@
 *.zip
 
 /labs/lab4/extracted/
+/labs/*/data
