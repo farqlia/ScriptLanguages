@@ -1,6 +1,6 @@
 import logging
 import sys
-import labs.lab5.src.analyze_ssh_logs as analyze_ssh_logs
+import labs.lab5.src.regex_ssh_analysis as analyze_ssh_logs
 
 
 def configure_logging(minimal_level=logging.DEBUG):

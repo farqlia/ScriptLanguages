@@ -2,16 +2,13 @@ import re
 import time
 from sys import getsizeof
 from collections import namedtuple
+import datetime
 from enum import Enum
-
-PATTERN = re.compile("(?P<month>\w+) (?P<day>\d+) (?P<time>\d{2}:\d{2}:\d{2}) "
-                     "(?P<host>\w+) sshd\[(?P<pid>\d+)]: (?P<message>.+)")
+from labs.lab5.src.ssh_logs_prepare import *
 
 IPV4_PATTERN = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 # Don't want to catch ruser
 USER_PATTERN = re.compile(r"((?<=[^r]user[\s=])\s*\w+|root)")
-
-log_entry = namedtuple("SSH_Entry", "month_day time host pid message")
 
 
 MESSAGE_PATTERNS = [re.compile("break[\s\-]?in"),
@@ -33,15 +30,6 @@ class MessageType(Enum):
 
     def format(self):
         return self.name.replace(r"\w+", " ").lower()
-
-
-def parse_entry(entry):
-    match = re.match(PATTERN, entry)
-    return log_entry(month_day=f"{match.group('month')}-{match.group('day')}",
-                     time=match.group('time'),
-                     host=match.group('host'),
-                     pid=int(match.group('pid')),
-                     message=match.group('message'))
 
 
 def get_ipv4s_from_log(entry: log_entry):
