@@ -65,7 +65,8 @@ class TestGetIPv4Logs:
                               ("Dec 10 07:27:55 LabSZ sshd[24237]: Received disconnect from 112.95.230.3: 11: Bye Bye [preauth]",
                               ["112.95.230.3"]),
                               ("Dec 10 07:51:17 LabSZ sshd[24326]: reverse mapping checking getaddrinfo for 195-154-37-122.rev.poneytelecom.eu [195.154.37.122] failed - POSSIBLE BREAK-IN ATTEMPT!",
-                               ["195.154.37.122"])])
+                               ["195.154.37.122"]),
+                              ])
     def test_correct_cases(self, entry, expected_addresses):
         actual_addresses = analyze_ssh_logs.get_ipv4s_from_log(ssh_logs_prepare.parse_entry(entry))
         assert actual_addresses == expected_addresses
@@ -110,8 +111,7 @@ class TestMessageType:
         mess_type = analyze_ssh_logs.get_message_type(ssh_logs_prepare.parse_entry(entry))
         assert mess_type == analyze_ssh_logs.MessageType.SUCCESSFUL_LOGIN
 
-    @pytest.mark.parametrize("entry", ["Dec 10 07:13:56 LabSZ sshd[24227]: Disconnecting: Too many authentication failures for root [preauth]",
-                                       "Dec 10 07:13:56 LabSZ sshd[24227]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.36.59.76.dynamic-dsl-ip.omantel.net.om  user=root",
+    @pytest.mark.parametrize("entry", ["Dec 10 07:13:56 LabSZ sshd[24227]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.36.59.76.dynamic-dsl-ip.omantel.net.om  user=root",
                                        "Dec 10 07:27:50 LabSZ sshd[24235]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3  user=root",
                                        "Dec 10 08:26:04 LabSZ sshd[24375]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.188.10.180 ",
                                        "Dec 10 09:11:29 LabSZ sshd[24445]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.99.0.122  user=root"])
@@ -123,7 +123,8 @@ class TestMessageType:
                                        "Dec 10 07:07:45 LabSZ sshd[24206]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]",
                                        "Dec 10 08:33:26 LabSZ sshd[24385]: Received disconnect from 103.207.39.212: 11: Closed due to user request. [preauth]",
                                        "Dec 10 09:11:22 LabSZ sshd[24439]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]",
-                                       "Dec 10 09:45:06 LabSZ sshd[24761]: Received disconnect from 119.137.62.142: 11: disconnected by user"])
+                                       "Dec 10 09:45:06 LabSZ sshd[24761]: Received disconnect from 119.137.62.142: 11: disconnected by user",
+                                       "Dec 10 11:48:13 LabSZ sshd[28523]: Disconnecting: Too many authentication failures for root [preauth]"])
     def test_closed_connection(self, entry):
         mess_type = analyze_ssh_logs.get_message_type(ssh_logs_prepare.parse_entry(entry))
         assert mess_type == analyze_ssh_logs.MessageType.CLOSED_CONNECTION

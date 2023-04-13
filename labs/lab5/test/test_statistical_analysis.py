@@ -16,6 +16,30 @@ def one_user_entries():
     return entries
 
 
+@pytest.fixture
+def test_entries():
+    entries = ["Dec 10 11:44:56 LabSZ sshd[28321]: Connection closed by 1.237.174.253 [preauth]",
+               "Dec 10 11:44:56 LabSZ sshd[28325]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=183.62.140.253  user=root",
+               "Dec 10 11:44:58 LabSZ sshd[28525]: Failed password for root from 183.62.140.253 port 40480 ssh2",
+               "Dec 10 11:48:00 LabSZ sshd[28523]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=180.101.249.16  user=root",
+               "Dec 10 11:48:02 LabSZ sshd[28525]: Failed password for root from 180.101.249.16 port 53496 ssh2",
+               "Dec 10 11:48:13 LabSZ sshd[28325]: Disconnecting: Too many authentication failures for root [preauth]",
+               "Dec 10 11:48:13 LabSZ sshd[28525]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=180.101.249.16  user=root",
+               "Dec 10 11:48:02 LabSZ sshd[28525]: Received disconnect from 183.62.140.253: 11: Bye Bye [preauth]"]
+    return list(map(ssh_logs_prepare.parse_entry, entries))
+
+@pytest.fixture
+def test_entries_2():
+    entries = ["Dec 10 08:33:24 LabSZ sshd[24385]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.207.39.212",
+                "Dec 10 08:33:26 LabSZ sshd[24385]: Received disconnect from 103.207.39.212: 11: Closed due to user request. [preauth]",
+                'Dec 10 08:33:27 LabSZ sshd[24387]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.207.39.212  user=uucp',
+                "Dec 10 08:33:29 LabSZ sshd[24389]: Invalid user admin from 103.207.39.212",
+                "Dec 10 08:33:29 LabSZ sshd[24389]: input_userauth_request: invalid user admin [preauth]",
+                "Dec 10 08:33:31 LabSZ sshd[24389]: Failed password for invalid user admin from 103.207.39.212 port 58447 ssh2",
+                ]
+    return list(map(ssh_logs_prepare.parse_entry, entries))
+
+
 def test_random_user(one_user_entries):
     print(statistical_analysis.get_random_user(one_user_entries))
 
@@ -36,5 +60,11 @@ def test_global_connection_times(one_user_entries):
     assert std == math.sqrt(((2 - mean) ** 2 + (2 - mean) ** 2) / 2)
 
 
-def test_user_connection_times(one_user_entries):
-    print(statistical_analysis.user_connection_time(one_user_entries))
+def test_user_connection_times(test_entries):
+    print(statistical_analysis.user_connection_time(test_entries))
+
+
+def test_frequency(test_entries_2):
+    most, least = statistical_analysis.get_most_and_least_active(test_entries_2)
+    assert most == 'admin'
+    assert least == 'uucp'

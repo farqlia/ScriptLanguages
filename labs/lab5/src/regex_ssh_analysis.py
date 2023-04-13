@@ -15,7 +15,7 @@ MESSAGE_PATTERNS = [re.compile("break[\s\-]?in"),
                     re.compile("failed password"),
                     re.compile("authentication failures?"),
                     re.compile("invalid user"),
-                    re.compile("connection closed|disconnect"),
+                    re.compile("connection closed|disconnect*?"),
                     re.compile("accepted")]
 
 
@@ -50,12 +50,13 @@ def get_message_type(entry: log_entry):
         return MessageType.BREAK_IN_ATTEMPT
     elif re.search(MESSAGE_PATTERNS[MessageType.INCORRECT_PASSWORD.value], message):
         return MessageType.INCORRECT_PASSWORD
+    elif re.search(MESSAGE_PATTERNS[MessageType.CLOSED_CONNECTION.value], message):
+        return MessageType.CLOSED_CONNECTION
     elif re.search(MESSAGE_PATTERNS[MessageType.UNSUCCESSFUL_LOGIN.value], message):
         return MessageType.UNSUCCESSFUL_LOGIN
     elif re.search(MESSAGE_PATTERNS[MessageType.INCORRECT_USERNAME.value], message):
         return MessageType.INCORRECT_USERNAME
-    elif re.search(MESSAGE_PATTERNS[MessageType.CLOSED_CONNECTION.value], message):
-        return MessageType.CLOSED_CONNECTION
+
     elif re.search(MESSAGE_PATTERNS[MessageType.SUCCESSFUL_LOGIN.value], message):
         return MessageType.SUCCESSFUL_LOGIN
     else:
