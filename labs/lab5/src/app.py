@@ -5,104 +5,101 @@ from pathlib import Path
 import labs.lab5.src.regex_ssh_analysis as analyze_ssh_logs
 import labs.lab5.src.statistical_analysis as statistical_analysis
 import labs.lab5.src.ssh_logs_prepare as ssh_logs_prepare
-import labs.lab5.src.logging_configure as logging_configure
+import labs.lab5.src.logging_configure as logging_module
 import argparse
 
 
-parser = argparse.ArgumentParser(description="SSH Logs Analyzer", add_help=True)
+class Application:
 
-parser.add_argument('loc', help='location of the file')
-parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
-                    help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
+    def __init__(self):
 
-subparsers = parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
+        self.levels_dict = {
+            'i': 'INFO', 'd': 'DEBUG', 'w': 'WARNING', 'e': 'ERROR', 'c': 'CRITICAL'
+        }
+        self.parser = argparse.ArgumentParser(description="SSH Logs Analyzer", add_help=True)
 
-subparsers.add_parser('ipv4', help='Get all IPv4 addresses')
-subparsers.add_parser('users', help='Get users')
-subparsers.add_parser('mstype', help='Get message type')
-nrand_parser = subparsers.add_parser('nrand', help='Get n random logs for a random user')
-nrand_parser.add_argument('-n', type=int, default=1)
-avg_parser = subparsers.add_parser('avg', help='Get average connection time')
-avg_parser.add_argument('-s', '--scope', choices=['g', 'u'], default='g', help='g - global, u - for each user')
-subparsers.add_parser('logfreq', help='Get most and least active user')
+        self.parser.add_argument('loc', help='location of the file')
+        self.parser.add_argument('-d', '--display', action='store_true', default=False, help='whether to display logs')
+        self.parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
+                            help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
 
-levels_dict = {
-    'i': 'INFO', 'd': 'DEBUG', 'w': 'WARNING', 'e': 'ERROR', 'c': 'CRITICAL'
-}
+        self.subparsers = self.parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
+        self.subparsers.add_parser('ipv4', help='Get all IPv4 addresses')
+        self.subparsers.add_parser('users', help='Get users')
+        self.subparsers.add_parser('mstype', help='Get message type')
+        self.nrand_parser = self.subparsers.add_parser('nrand', help='Get n random logs for a random user')
+        self.nrand_parser.add_argument('-n', type=int, default=1)
+        self.avg_parser = self.subparsers.add_parser('avg', help='Get average connection time')
+        self.avg_parser.add_argument('-s', '--scope', choices=['g', 'u'], default='g', help='g - global, u - for each user')
+        self.subparsers.add_parser('logfreq', help='Get most and least active user')\
 
+        self.results = None
+        self.ssh_logs = []
+        self.arguments = None
 
-def exec_reg_commands(ssh_logs, arguments):
+    def frmt(self, log):
+        if self.arguments.display:
+            return ", '" + log.message[:30] + " [...]'"
+        else:
+            return ""
 
-    f = lambda entry: entry
+    def _exec_commands(self):
 
-    if arguments.functionality == 'ipv4':
-        f = lambda entry: f"IPv4 addresses: {analyze_ssh_logs.get_ipv4s_from_log(entry)}\n"
-    elif arguments.functionality == 'users':
-        f = lambda entry: f"Users: {analyze_ssh_logs.get_user_from_log(entry)}\n"
-    elif arguments.functionality == 'mstype':
-        f = lambda entry: f"Log type: {analyze_ssh_logs.get_message_type(entry)}"
+        if self.arguments.functionality == 'nrand':
+            self.results = statistical_analysis.get_n_random_entries(self.ssh_logs, self.arguments.n)
+        elif self.arguments.functionality == 'avg':
+            if self.arguments.scope == 'u':
+                self.results = statistical_analysis.user_connection_time(self.ssh_logs)
+            elif self.arguments.scope == 'g':
+                self.results = statistical_analysis.global_connection_time(self.ssh_logs)
+        elif self.arguments.functionality == 'logfreq':
+            self.results = statistical_analysis.get_most_and_least_active(self.ssh_logs)
+        elif self.arguments.functionality == 'ipv4':
+            self.results = [f"IPv4 addresses: {analyze_ssh_logs.get_ipv4s_from_log(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
+        elif self.arguments.functionality == 'users':
+            self.results = [f"Users: {analyze_ssh_logs.get_user_from_log(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
+        elif self.arguments.functionality == 'mstype':
+            self.results = [f"Log type: {analyze_ssh_logs.get_message_type(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
 
-    return [f(entry) for entry in ssh_logs]
+    def _output_results(self):
+        if isinstance(self.results, list):
+            for row in self.results:
+                print(row)
+        else:
+            if self.results:
+                print(self.results)
 
+    def read_data(self):
+        file_location = self.arguments.loc
+        if os.path.isfile(file_location):
+            with open(file_location) as f:
 
-def exec_stat_commands(ssh_logs, arguments):
+                for entry in f:
+                    self.ssh_logs.append(ssh_logs_prepare.parse_entry(entry))
+                    logging_module.log_data(self.ssh_logs[-1])
+            return True
+        else:
+            logging.error(f"Error: the file {file_location} does not exist")
+            return False
 
-    if arguments.functionality == 'nrand':
-        return statistical_analysis.get_n_random_entries(ssh_logs, arguments.n)
-    elif arguments.functionality == 'avg':
-        if arguments.scope == 'u':
-            return statistical_analysis.user_connection_time(ssh_logs)
-        elif arguments.scope == 'g':
-            return statistical_analysis.global_connection_time(ssh_logs)
-    elif arguments.functionality == 'logfreq':
-        return statistical_analysis.get_most_and_least_active(ssh_logs)
+    def run(self):
 
-    return ""
+        self.arguments = self.parser.parse_args()
+        print(self.arguments)
 
+        if self.arguments.level:
+            minimal_level = getattr(logging, self.levels_dict[self.arguments.level])
+        else:
+            minimal_level = logging.DEBUG
 
-def exec_commands(ssh_logs, arguments):
+        logging_module.configure_logging(minimal_level)
 
-    if arguments.functionality == 'nrand':
-        return "".format(statistical_analysis.get_n_random_entries(ssh_logs, arguments.n))
-    elif arguments.functionality == 'avg':
-        if arguments.scope == 'u':
-            return [statistical_analysis.user_connection_time(ssh_logs)]
-        elif arguments.scope == 'g':
-            return [statistical_analysis.global_connection_time(ssh_logs)]
-    elif arguments.functionality == 'logfreq':
-        return statistical_analysis.get_most_and_least_active(ssh_logs)
-    elif arguments.functionality == 'ipv4':
-        return [f"IPv4 addresses: {analyze_ssh_logs.get_ipv4s_from_log(entry)}" for entry in ssh_logs]
-    elif arguments.functionality == 'users':
-        return [f"Users: {analyze_ssh_logs.get_user_from_log(entry)}" for entry in ssh_logs]
-    elif arguments.functionality == 'mstype':
-        return [f"Log type: {analyze_ssh_logs.get_message_type(entry)}" for entry in ssh_logs]
-
-    return []
+        if self.read_data():
+            self._exec_commands()
+            self._output_results()
 
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    file_location = args.loc
 
-    if args.level:
-        minimal_level = getattr(logging, levels_dict[args.level])
-    else:
-        minimal_level = logging.DEBUG
-
-    if os.path.isfile(file_location):
-        logging_configure.configure_logging(minimal_level)
-        print(args)
-        with open(file_location) as f:
-            ssh_passed_logs = []
-
-            for entry in f:
-                ssh_passed_logs.append(ssh_logs_prepare.parse_entry(entry))
-                logging_configure.log_data(ssh_passed_logs[-1])
-
-            result = exec_commands(ssh_passed_logs, args)
-            for r in result:
-                print(r)
-
-    else:
-        print("Error: the file")
+    App = Application()
+    App.run()

@@ -17,8 +17,8 @@ def get_n_random_entries(ssh_logs, n):
 
     users = [regex_ssh_analysis.get_user_from_log(entry) for entry in ssh_logs]
     rand_usr = get_random_user(users)
-    return random.sample(list(map(lambda e: e[0],
-                        filter(lambda e: e[1] == rand_usr, zip(ssh_logs, users)))), n)
+    return random.choices(list(map(lambda e: e[0],
+                          filter(lambda e: e[1] == rand_usr, zip(ssh_logs, users)))), k=n)
 
 
 def compute_connection_time(ssh_logs):
