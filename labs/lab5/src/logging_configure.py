@@ -39,22 +39,26 @@ def log_bytes_read(log_entry):
     logging.debug(f"Bytes read: {compute_bytes(log_entry)}")
 
 
-def log_data(log_entry):
+def log_data(log_entry, display=False):
 
     mssg_type = analyze_ssh_logs.get_message_type(log_entry)
 
     log_bytes_read(log_entry)
 
+    value = mssg_type.format()
+    if display:
+        value += f", '{log_entry.message[:40]} [...]'"
+
     if mssg_type == analyze_ssh_logs.MessageType.SUCCESSFUL_LOGIN \
             or mssg_type == analyze_ssh_logs.MessageType.CLOSED_CONNECTION:
-        logging.info(mssg_type.format())
+        logging.info(value)
     elif mssg_type == analyze_ssh_logs.MessageType.UNSUCCESSFUL_LOGIN:
-        logging.warning(mssg_type.format())
+        logging.warning(value)
     elif mssg_type == analyze_ssh_logs.MessageType.INCORRECT_USERNAME \
             or mssg_type == analyze_ssh_logs.MessageType.INCORRECT_PASSWORD:
-        logging.error(mssg_type.format())
+        logging.error(value)
     elif mssg_type == analyze_ssh_logs.MessageType.BREAK_IN_ATTEMPT:
-        logging.critical(mssg_type.format())
+        logging.critical(value)
 
 
 def log_debug(message):

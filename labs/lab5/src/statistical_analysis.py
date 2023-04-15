@@ -49,9 +49,9 @@ def user_connection_time(ssh_logs):
         if user and (entry.pid in connection_times):
             if user not in users_connection_times:
                 users_connection_times[user] = []
-            users_connection_times.get(user, []).append(connection_times[entry.pid])
+            users_connection_times[user].append(connection_times[entry.pid])
 
-    return {k: (statistics.mean(v), statistics.stdev(v)) for k, v in users_connection_times.items()}
+    return {k: (statistics.mean(v), statistics.stdev(v) if len(v) > 1 else 0) for k, v in users_connection_times.items()}
 
 
 def get_most_and_least_active(ssh_logs):

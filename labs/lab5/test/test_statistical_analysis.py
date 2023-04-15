@@ -64,6 +64,12 @@ def test_user_connection_times(test_entries):
     print(statistical_analysis.user_connection_time(test_entries))
 
 
+def test_user_connection_times_2(test_entries_2):
+    connection_times = statistical_analysis.user_connection_time(test_entries_2)
+    print(connection_times)
+    assert connection_times['request'][1] == 0
+
+
 def test_frequency(test_entries_2):
     most, least = statistical_analysis.get_most_and_least_active(test_entries_2)
     assert most == 'admin'

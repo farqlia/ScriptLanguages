@@ -69,14 +69,31 @@ class Application:
             if self.results:
                 print(self.results)
 
+    def _configure_logging(self):
+        if self.arguments.level:
+            minimal_level = getattr(logging, self.levels_dict[self.arguments.level])
+            logging_module.configure_logging(minimal_level)
+
+    def log_data(self, data):
+        if self.arguments.level:
+            logging_module.log_data(data, self.arguments.display)
+
+    def log_error(self, msg):
+        if self.arguments.level:
+            logging.error(msg)
+
     def read_data(self):
         file_location = self.arguments.loc
         if os.path.isfile(file_location):
             with open(file_location) as f:
 
                 for entry in f:
-                    self.ssh_logs.append(ssh_logs_prepare.parse_entry(entry))
-                    logging_module.log_data(self.ssh_logs[-1])
+                    try:
+                        self.ssh_logs.append(ssh_logs_prepare.parse_entry(entry))
+                        self.log_data(self.ssh_logs[-1])
+                    except ValueError as e:
+                        logging.error(e)
+
             return True
         else:
             logging.error(f"Error: the file {file_location} does not exist")
@@ -87,12 +104,7 @@ class Application:
         self.arguments = self.parser.parse_args()
         print(self.arguments)
 
-        if self.arguments.level:
-            minimal_level = getattr(logging, self.levels_dict[self.arguments.level])
-        else:
-            minimal_level = logging.DEBUG
-
-        logging_module.configure_logging(minimal_level)
+        self._configure_logging()
 
         if self.read_data():
             self._exec_commands()

@@ -99,7 +99,8 @@ class TestGetUserFromLog:
                               "Dec 10 07:07:45 LabSZ sshd[24206]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]",
                               "Dec 10 07:08:28 LabSZ sshd[24208]: reverse mapping checking getaddrinfo for ns.marryaldkfaczcz.com [173.234.31.186] failed - POSSIBLE BREAK-IN ATTEMPT!",
                               "Dec 10 07:08:30 LabSZ sshd[24208]: Connection closed by 173.234.31.186 [preauth]",
-                              "Dec 10 07:28:03 LabSZ sshd[24245]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3 "])
+                              "Dec 10 07:28:03 LabSZ sshd[24245]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3 ",
+                              "Dec 11 08:30:45 LabSZ sshd[22341]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]"])
     def test_cases_without_users(self, entry):
         assert not analyze_ssh_logs.get_user_from_log(ssh_logs_prepare.parse_entry(entry))
 
