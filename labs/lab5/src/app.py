@@ -1,5 +1,6 @@
 import logging
 import os.path
+import sys
 from pathlib import Path
 
 import labs.lab5.src.regex_ssh_analysis as analyze_ssh_logs
@@ -13,22 +14,24 @@ class Application:
 
     def __init__(self):
 
+        self.parser = ssh_logs_prepare.Parser()
+
         self.levels_dict = {
             'i': 'INFO', 'd': 'DEBUG', 'w': 'WARNING', 'e': 'ERROR', 'c': 'CRITICAL'
         }
-        self.parser = argparse.ArgumentParser(description="SSH Logs Analyzer", add_help=True)
+        self.arg_parser = argparse.ArgumentParser(description="SSH Logs Analyzer", add_help=True)
 
-        self.parser.add_argument('loc', help='location of the file')
-        self.parser.add_argument('-d', '--display', action='store_true', default=False, help='whether to display logs')
-        self.parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
-                            help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
+        self.arg_parser.add_argument('loc', help='location of the file')
+        self.arg_parser.add_argument('-d', '--display', action='store_true', default=False, help='whether to display logs')
+        self.arg_parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
+                                     help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
 
-        self.subparsers = self.parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
+        self.subparsers = self.arg_parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
         self.subparsers.add_parser('ipv4', help='Get all IPv4 addresses')
         self.subparsers.add_parser('users', help='Get users')
         self.subparsers.add_parser('mstype', help='Get message type')
         self.nrand_parser = self.subparsers.add_parser('nrand', help='Get n random logs for a random user')
-        self.nrand_parser.add_argument('-n', type=int, default=1)
+        self.nrand_parser.add_argument('-n', type=int, default=1, help="Number of logs taken with replacement")
         self.avg_parser = self.subparsers.add_parser('avg', help='Get average connection time')
         self.avg_parser.add_argument('-s', '--scope', choices=['g', 'u'], default='g', help='g - global, u - for each user')
         self.subparsers.add_parser('logfreq', help='Get most and least active user')\
@@ -89,19 +92,19 @@ class Application:
 
                 for entry in f:
                     try:
-                        self.ssh_logs.append(ssh_logs_prepare.parse_entry(entry))
+                        self.ssh_logs.append(self.parser.parse_entry(entry))
                         self.log_data(self.ssh_logs[-1])
                     except ValueError as e:
                         logging.error(e)
 
             return True
         else:
-            logging.error(f"Error: the file {file_location} does not exist")
+            sys.stderr.write(f"Error: the file {file_location} does not exist")
             return False
 
     def run(self):
 
-        self.arguments = self.parser.parse_args()
+        self.arguments = self.arg_parser.parse_args()
         print(self.arguments)
 
         self._configure_logging()

@@ -13,10 +13,10 @@ USER_PATTERN = re.compile(r"((?<=[^r]user[\s=])(?!authentication)\s*\w+|root)")
 
 MESSAGE_PATTERNS = [re.compile("break[\s\-]?in"),
                     re.compile("failed password"),
-                    re.compile("authentication failures?"),
+                    re.compile("authentication failures?|input_userauth_request"),
                     re.compile("invalid user"),
                     re.compile("connection closed|disconnect*?"),
-                    re.compile("accepted")]
+                    re.compile("^accepted")]
 
 
 class MessageType(Enum):
@@ -32,17 +32,17 @@ class MessageType(Enum):
         return self.name.replace(r"\w+", " ").lower()
 
 
-def get_ipv4s_from_log(entry: log_entry):
+def get_ipv4s_from_log(entry):
     matches = re.findall(IPV4_PATTERN, entry.message)
-    return matches
+    return matches[0] if len(matches) == 1 else matches
 
 
-def get_user_from_log(entry: log_entry):
+def get_user_from_log(entry):
     match = re.search(USER_PATTERN, entry.message)
     return match.group(0).strip() if match else None
 
 
-def get_message_type(entry: log_entry):
+def get_message_type(entry):
 
     message = entry.message.lower()
 

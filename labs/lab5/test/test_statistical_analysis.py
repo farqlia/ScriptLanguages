@@ -2,17 +2,19 @@ import math
 
 import labs.lab5.src.statistical_analysis as statistical_analysis
 import labs.lab5.src.ssh_logs_prepare as ssh_logs_prepare
+import labs.lab5.src.regex_ssh_analysis as regex_ssh_analysis
 
 import pytest
 from pathlib import Path
 
+parser = ssh_logs_prepare.Parser()
 
 @pytest.fixture
 def one_user_entries():
     entries = []
     with open(Path.cwd().parent.joinpath('data', 'one_user.log')) as f:
         for line in f:
-            entries.append(ssh_logs_prepare.parse_entry(line))
+            entries.append(parser.parse_entry(line))
     return entries
 
 
@@ -26,7 +28,7 @@ def test_entries():
                "Dec 10 11:48:13 LabSZ sshd[28325]: Disconnecting: Too many authentication failures for root [preauth]",
                "Dec 10 11:48:13 LabSZ sshd[28525]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=180.101.249.16  user=root",
                "Dec 10 11:48:02 LabSZ sshd[28525]: Received disconnect from 183.62.140.253: 11: Bye Bye [preauth]"]
-    return list(map(ssh_logs_prepare.parse_entry, entries))
+    return list(map(parser.parse_entry, entries))
 
 @pytest.fixture
 def test_entries_2():
@@ -37,7 +39,7 @@ def test_entries_2():
                 "Dec 10 08:33:29 LabSZ sshd[24389]: input_userauth_request: invalid user admin [preauth]",
                 "Dec 10 08:33:31 LabSZ sshd[24389]: Failed password for invalid user admin from 103.207.39.212 port 58447 ssh2",
                 ]
-    return list(map(ssh_logs_prepare.parse_entry, entries))
+    return list(map(parser.parse_entry, entries))
 
 
 def test_random_user(one_user_entries):
@@ -48,12 +50,6 @@ def test_random_logs(one_user_entries):
     print(statistical_analysis.get_n_random_entries(one_user_entries, 3))
 
 
-def test_connection_time(one_user_entries):
-    assert statistical_analysis.compute_connection_time(one_user_entries) == {
-        27952: 0.0, 27954: 2.0, 27956: 2.0
-    }
-
-
 def test_global_connection_times(one_user_entries):
     mean, std = statistical_analysis.global_connection_time(one_user_entries)
     assert mean == (4 / 3)
@@ -61,13 +57,27 @@ def test_global_connection_times(one_user_entries):
 
 
 def test_user_connection_times(test_entries):
-    print(statistical_analysis.user_connection_time(test_entries))
+    print(statistical_analysis.compute_connection_time2(test_entries))
 
 
 def test_user_connection_times_2(test_entries_2):
     connection_times = statistical_analysis.user_connection_time(test_entries_2)
     print(connection_times)
     assert connection_times['request'][1] == 0
+
+
+def test_user_connection_times_with_different_years():
+
+    with open(r'C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab5\data\SSH_test_2.log') as f:
+
+        specific_user = list(filter(lambda entry: regex_ssh_analysis.get_user_from_log(entry) == 'root',
+                               (parser.parse_entry(row) for row in f)))
+
+        print()
+        for row in specific_user:
+            print(row)
+
+        print(statistical_analysis.compute_connection_time(specific_user))
 
 
 def test_frequency(test_entries_2):

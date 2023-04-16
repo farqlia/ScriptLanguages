@@ -31,7 +31,7 @@ def filter_maker(level):
     return filter_log
 
 
-def compute_bytes(log_entry: analyze_ssh_logs.log_entry):
+def compute_bytes(log_entry):
     return sum(sys.getsizeof(elem) for elem in log_entry)
 
 

@@ -25,12 +25,38 @@ def compute_connection_time(ssh_logs):
     open_connection_time = {}
     connection_time = {}
     for entry in ssh_logs:
-        if entry.pid not in open_connection_time:
-            open_connection_time[entry.pid] = entry.date
 
-        elif entry.pid in open_connection_time and \
+        user = regex_ssh_analysis.get_user_from_log(entry)
+        ipv4_address = regex_ssh_analysis.get_ipv4s_from_log(entry)
+
+        if regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.UNSUCCESSFUL_LOGIN and ipv4_address and user:
+            open_connection_time[ipv4_address[0]] = (entry.date, user)
+
+        elif ipv4_address and ipv4_address[0] in open_connection_time and \
                 regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.CLOSED_CONNECTION:
-            connection_time[entry.pid] = (entry.date - open_connection_time[entry.pid]).total_seconds()
+            connection_date, user = open_connection_time[ipv4_address[0]]
+            connection_time[user] = connection_time.get(user, 0) + (
+                    entry.date - connection_date).total_seconds()
+
+    return connection_time
+
+
+def compute_connection_time2(ssh_logs):
+
+    connection_time = {}
+    for i, entry in enumerate(ssh_logs):
+
+        user = regex_ssh_analysis.get_user_from_log(entry)
+        ipv4_address = regex_ssh_analysis.get_ipv4s_from_log(entry)
+
+        if regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.UNSUCCESSFUL_LOGIN\
+                and ipv4_address:
+
+            for j in range(i + 1, len(ssh_logs)):
+                if regex_ssh_analysis.get_message_type(ssh_logs[j]) == regex_ssh_analysis.MessageType.CLOSED_CONNECTION\
+                        and ipv4_address == regex_ssh_analysis.get_ipv4s_from_log(ssh_logs[j]):
+                    connection_time[user] = connection_time.get(user, 0) + (
+                            ssh_logs[j].date - entry.date).total_seconds()
 
     return connection_time
 
