@@ -21,6 +21,7 @@ class Application:
         }
         self.arg_parser = argparse.ArgumentParser(description="SSH Logs Analyzer", add_help=True)
 
+        self.arg_parser.add_argument('-n', '--nlines', type=int, help='max number of lines to read')
         self.arg_parser.add_argument('loc', help='location of the file')
         self.arg_parser.add_argument('-d', '--display', action='store_true', default=False, help='whether to display logs')
         self.arg_parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
@@ -90,6 +91,7 @@ class Application:
         if os.path.isfile(file_location):
             with open(file_location) as f:
 
+                n_lines = 0
                 for entry in f:
                     try:
                         self.ssh_logs.append(self.parser.parse_entry(entry))
@@ -97,6 +99,9 @@ class Application:
                     except ValueError as e:
                         logging.error(e)
 
+                    n_lines += 1
+                    if self.arguments.nlines and n_lines == self.arguments.nlines:
+                        break
             return True
         else:
             sys.stderr.write(f"Error: the file {file_location} does not exist")

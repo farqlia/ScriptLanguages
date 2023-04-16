@@ -21,63 +21,46 @@ def get_n_random_entries(ssh_logs, n):
                           filter(lambda e: e[1] == rand_usr, zip(ssh_logs, users)))), k=n)
 
 
-def compute_connection_time(ssh_logs):
-    open_connection_time = {}
-    connection_time = {}
-    for entry in ssh_logs:
-
-        user = regex_ssh_analysis.get_user_from_log(entry)
-        ipv4_address = regex_ssh_analysis.get_ipv4s_from_log(entry)
-
-        if regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.UNSUCCESSFUL_LOGIN and ipv4_address and user:
-            open_connection_time[ipv4_address[0]] = (entry.date, user)
-
-        elif ipv4_address and ipv4_address[0] in open_connection_time and \
-                regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.CLOSED_CONNECTION:
-            connection_date, user = open_connection_time[ipv4_address[0]]
-            connection_time[user] = connection_time.get(user, 0) + (
-                    entry.date - connection_date).total_seconds()
-
-    return connection_time
-
-
-def compute_connection_time2(ssh_logs):
+def compute_user_connection_times(ssh_logs):
 
     connection_time = {}
+
     for i, entry in enumerate(ssh_logs):
 
         user = regex_ssh_analysis.get_user_from_log(entry)
         ipv4_address = regex_ssh_analysis.get_ipv4s_from_log(entry)
 
-        if regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.UNSUCCESSFUL_LOGIN\
-                and ipv4_address:
+        if user not in connection_time:
+            connection_time[user] = []
 
-            for j in range(i + 1, len(ssh_logs)):
-                if regex_ssh_analysis.get_message_type(ssh_logs[j]) == regex_ssh_analysis.MessageType.CLOSED_CONNECTION\
-                        and ipv4_address == regex_ssh_analysis.get_ipv4s_from_log(ssh_logs[j]):
-                    connection_time[user] = connection_time.get(user, 0) + (
-                            ssh_logs[j].date - entry.date).total_seconds()
+        if regex_ssh_analysis.get_message_type(entry) == regex_ssh_analysis.MessageType.CLOSED_CONNECTION and ipv4_address:
+
+            for j in range(i - 1, 0, -1):
+
+                this_ipv4 = regex_ssh_analysis.get_ipv4s_from_log(ssh_logs[j])
+                user = regex_ssh_analysis.get_user_from_log(ssh_logs[j])
+
+                mstype = regex_ssh_analysis.get_message_type(ssh_logs[j])
+                if (mstype == regex_ssh_analysis.MessageType.UNSUCCESSFUL_LOGIN
+                or mstype == regex_ssh_analysis.MessageType.INCORRECT_USERNAME) and ipv4_address == this_ipv4\
+                        and user:
+                    connection_time[user].append((entry.date - ssh_logs[j].date).total_seconds())
+                    break
 
     return connection_time
 
 
 def global_connection_time(ssh_logs):
-    connection_times = compute_connection_time(ssh_logs)
-    return statistics.mean(connection_times.values()), statistics.stdev(connection_times.values())
+    connection_times = compute_user_connection_times(ssh_logs)
+    all_values = [time for times in connection_times.values() for time in times]
+    return statistics.mean(all_values) if len(all_values) > 0 else 0,\
+           statistics.stdev(all_values) if len(all_values) > 1 else 0
 
 
 def user_connection_time(ssh_logs):
-    connection_times = compute_connection_time(ssh_logs)
-    users_connection_times = {}
-
-    for entry in ssh_logs:
-        user = regex_ssh_analysis.get_user_from_log(entry)
-        if user and (entry.pid in connection_times):
-            if user not in users_connection_times:
-                users_connection_times[user] = []
-            users_connection_times[user].append(connection_times[entry.pid])
-
-    return {k: (statistics.mean(v), statistics.stdev(v) if len(v) > 1 else 0) for k, v in users_connection_times.items()}
+    connection_times = compute_user_connection_times(ssh_logs)
+    return {k: (statistics.mean(v) if len(v) > 0 else 0, statistics.stdev(v) if len(v) > 1 else 0)
+            for k, v in connection_times.items()}
 
 
 def get_most_and_least_active(ssh_logs):

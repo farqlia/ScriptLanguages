@@ -4,6 +4,7 @@ from collections import namedtuple
 import datetime
 from datetime import timedelta
 
+
 class Parser:
 
     PATTERN = re.compile("(?P<date>\w+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+"

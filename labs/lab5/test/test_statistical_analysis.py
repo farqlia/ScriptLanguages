@@ -56,9 +56,6 @@ def test_global_connection_times(one_user_entries):
     assert std == math.sqrt(((2 - mean) ** 2 + (2 - mean) ** 2) / 2)
 
 
-def test_user_connection_times(test_entries):
-    print(statistical_analysis.compute_connection_time2(test_entries))
-
 
 def test_user_connection_times_2(test_entries_2):
     connection_times = statistical_analysis.user_connection_time(test_entries_2)
@@ -68,16 +65,17 @@ def test_user_connection_times_2(test_entries_2):
 
 def test_user_connection_times_with_different_years():
 
-    with open(r'C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab5\data\SSH_test_2.log') as f:
+    with open(r'C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab5\data\SSH_sample_logs.log') as f:
 
-        specific_user = list(filter(lambda entry: regex_ssh_analysis.get_user_from_log(entry) == 'root',
-                               (parser.parse_entry(row) for row in f)))
+        specific_user = [parser.parse_entry(row) for row in f]
 
         print()
         for row in specific_user:
             print(row)
 
-        print(statistical_analysis.compute_connection_time(specific_user))
+        print(statistical_analysis.compute_user_connection_times(specific_user))
+        print(statistical_analysis.user_connection_time(specific_user))
+        print(statistical_analysis.global_connection_time(specific_user))
 
 
 def test_frequency(test_entries_2):
