@@ -26,15 +26,15 @@ class Application:
         self.arg_parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
                                       help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
 
-        self.subparsers = self.arg_parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
-        self.subparsers.add_parser('ipv4', help='Get all IPv4 addresses')
-        self.subparsers.add_parser('users', help='Get users')
-        self.subparsers.add_parser('mstype', help='Get message type')
-        self.nrand_parser = self.subparsers.add_parser('nrand', help='Get n random logs for a random user')
+        self.arg_subparsers = self.arg_parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
+        self.arg_subparsers.add_parser('ipv4', help='Get all IPv4 addresses')
+        self.arg_subparsers.add_parser('users', help='Get users')
+        self.arg_subparsers.add_parser('mstype', help='Get message type')
+        self.nrand_parser = self.arg_subparsers.add_parser('nrand', help='Get n random logs for a random user')
         self.nrand_parser.add_argument('-n', type=int, default=1, help="Number of logs taken with replacement")
-        self.avg_parser = self.subparsers.add_parser('avg', help='Get average connection time')
+        self.avg_parser = self.arg_subparsers.add_parser('avg', help='Get average connection time')
         self.avg_parser.add_argument('-s', '--scope', choices=['g', 'u'], default='g', help='g - global, u - for each user')
-        self.subparsers.add_parser('logfreq', help='Get most and least active user')\
+        self.arg_subparsers.add_parser('logfreq', help='Get most and least active user')\
 
         self.results = None
         self.ssh_logs = []
@@ -60,14 +60,17 @@ class Application:
         elif self.arguments.functionality == 'ipv4':
             self.results = [f"IPv4 addresses: {analyze_ssh_logs.get_ipv4s_from_log(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
         elif self.arguments.functionality == 'users':
-            self.results = [f"Users: {analyze_ssh_logs.get_user_from_log(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
+            self.results = [f"User: {analyze_ssh_logs.get_user_from_log(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
         elif self.arguments.functionality == 'mstype':
-            self.results = [f"Log type: {analyze_ssh_logs.get_message_type(entry)} {self.frmt(entry)}" for entry in self.ssh_logs]
+            self.results = [f"Log type: {analyze_ssh_logs.get_message_type(entry).format()} {self.frmt(entry)}" for entry in self.ssh_logs]
 
     def _output_results(self):
         if isinstance(self.results, list):
             for row in self.results:
                 print(row)
+        elif isinstance(self.results, dict):
+            for k, v in self.results.items():
+                print(f"{k}: {v}")
         else:
             if self.results:
                 print(self.results)
@@ -109,7 +112,7 @@ class Application:
     def run(self):
 
         self.arguments = self.arg_parser.parse_args()
-        print(self.arguments)
+        # print(self.arguments)
 
         self._configure_logging()
 

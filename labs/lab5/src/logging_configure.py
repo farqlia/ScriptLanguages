@@ -10,7 +10,6 @@ def configure_logging(minimal_level=logging.DEBUG):
     error_handler.setLevel(logging.ERROR)
     error_handler.setFormatter(formatter)
 
-    # console_handler = logging.FileHandler('../logs.log')
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG)
 

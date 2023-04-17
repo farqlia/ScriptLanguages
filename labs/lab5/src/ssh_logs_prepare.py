@@ -2,7 +2,6 @@ import re
 import time
 from collections import namedtuple
 import datetime
-from datetime import timedelta
 
 
 class Parser:
