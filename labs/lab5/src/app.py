@@ -1,7 +1,6 @@
 import logging
 import os.path
 import sys
-from pathlib import Path
 
 import labs.lab5.src.regex_ssh_analysis as analyze_ssh_logs
 import labs.lab5.src.statistical_analysis as statistical_analysis
@@ -25,7 +24,7 @@ class Application:
         self.arg_parser.add_argument('loc', help='location of the file')
         self.arg_parser.add_argument('-d', '--display', action='store_true', default=False, help='whether to display logs')
         self.arg_parser.add_argument('-l', '--level', choices=['i', 'd', 'w', 'e', 'c'], required=False,
-                                     help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
+                                      help='minimal logging level\ni - INFO, d - DEBUG, w - WARNING, e - ERROR, c - CRITICAL')
 
         self.subparsers = self.arg_parser.add_subparsers(title='Logs Analysis Commands', dest='functionality')
         self.subparsers.add_parser('ipv4', help='Get all IPv4 addresses')
@@ -43,7 +42,7 @@ class Application:
 
     def frmt(self, log):
         if self.arguments.display:
-            return ", '" + log.message[:30] + " [...]'"
+            return "\n" + self.parser.frmt(log)
         else:
             return ""
 

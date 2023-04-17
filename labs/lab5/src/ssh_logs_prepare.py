@@ -16,7 +16,7 @@ class Parser:
         self.curr_year = 2022
         self.set_year = False
 
-    def format_date(self, match):
+    def get_date(self, match):
         date = datetime.datetime.strptime(match.group('date'), "%b %d %H:%M:%S")
 
         if date.month == 1 and not self.set_year:
@@ -27,13 +27,16 @@ class Parser:
                                  minute=date.minute, hour=date.hour, second=date.second)
         return date
 
+    def frmt(self, log: log_entry, length=30):
+        return f"{log.date.strftime('%d-%m-%y, %H:%M:%S')}, [{log.pid}] - {log.message[:length]} [...]"
+
     def parse_entry(self, entry):
         match = re.match(Parser.PATTERN, entry)
 
         if not match:
             raise ValueError(f"Couldn't parse: {entry}")
 
-        return Parser.log_entry(date=self.format_date(match),
-                         host=match.group('host'),
-                         pid=int(match.group('pid')),
-                         message=match.group('message'))
+        return Parser.log_entry(date=self.get_date(match),
+                                host=match.group('host'),
+                                pid=int(match.group('pid')),
+                                message=match.group('message'))

@@ -34,7 +34,7 @@ class MessageType(Enum):
 
 def get_ipv4s_from_log(entry):
     matches = re.findall(IPV4_PATTERN, entry.message)
-    return matches[0] if len(matches) == 1 else matches
+    return matches
 
 
 def get_user_from_log(entry):
@@ -61,7 +61,6 @@ def get_message_type(entry):
         return MessageType.UNSUCCESSFUL_LOGIN
     elif re.search(MESSAGE_PATTERNS[MessageType.INCORRECT_USERNAME.value], message):
         return MessageType.INCORRECT_USERNAME
-
     elif re.search(MESSAGE_PATTERNS[MessageType.SUCCESSFUL_LOGIN.value], message):
         return MessageType.SUCCESSFUL_LOGIN
     else:
