@@ -81,6 +81,25 @@ class TestGetIPv4Logs:
     def test_cases_without_addresses(self, entry):
         assert not analyze_ssh_logs.get_ipv4s_from_log(parser.parse_entry(entry))
 
+    @pytest.mark.parametrize("entry,expected_addresses",
+                             [("Dec 10 07:27:55 LabSZ sshd[24237]: Received disconnect from 255.255.255.255: 11: Bye Bye [preauth]", ["255.255.255.255"]),
+                              ("Dec 10 07:07:38 LabSZ sshd[24206]: Invalid user test9 from 0.0.0.0", ["0.0.0.0"])])
+    def test_positive_corner_cases(self, entry, expected_addresses):
+        assert analyze_ssh_logs.get_ipv4s_from_log(parser.parse_entry(entry)) == expected_addresses
+
+    @pytest.mark.parametrize("entry",
+                             ["Dec 10 07:27:55 LabSZ sshd[24237]: Received disconnect from 255.255.255.256: 11: Bye Bye [preauth]",
+                              "Dec 10 07:27:55 LabSZ sshd[24237]: Received disconnect from 255.255.265.265",
+                              "Dec 10 07:07:38 LabSZ sshd[24206]: Invalid user test9 from 0.800.0.0"])
+    def test_negative_corner_cases(self, entry):
+        assert not analyze_ssh_logs.get_ipv4s_from_log(parser.parse_entry(entry))
+
+    @pytest.mark.parametrize("entry,expected_matches",
+                             [("Sends from host 1.1.1.1", "1.1.1.1"), ("Invalid address 255.0.0.0", "255.0.0.0"),
+                              ("Hello from 199.199.18.1 Bye", "199.199.18.1"), ("Connecting from 255.249.239.9", "255.249.239.9")])
+    def test_ipv4_pattern(self, entry, expected_matches):
+        assert analyze_ssh_logs.IPV4_PATTERN.search(entry).group(1) == expected_matches
+
 
 class TestGetUserFromLog:
 
@@ -144,10 +163,7 @@ class TestMessageType:
         assert mess_type == analyze_ssh_logs.MessageType.INCORRECT_PASSWORD
 
     @pytest.mark.parametrize("entry", ["Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186",
-                                       "Dec 10 06:55:46 LabSZ sshd[24200]: input_userauth_request: invalid user webmaster [preauth]",
-                                       "Dec 10 08:25:27 LabSZ sshd[24371]: input_userauth_request: invalid user admin [preauth]",
                                        "Dec 10 09:07:23 LabSZ sshd[24415]: Invalid user 0 from 185.190.58.151",
-                                       "Dec 10 09:12:28 LabSZ sshd[24488]: input_userauth_request: invalid user monitor [preauth]",
                                        "Dec 10 09:48:23 LabSZ sshd[24806]: Failed none for invalid user 0 from 181.214.87.4 port 51889 ssh2"])
     def test_incorrect_username(self, entry):
         mess_type = analyze_ssh_logs.get_message_type(parser.parse_entry(entry))

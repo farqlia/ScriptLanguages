@@ -2,6 +2,15 @@ import logging
 import sys
 import labs.lab5.src.regex_ssh_analysis as analyze_ssh_logs
 
+OPERATIONS = {
+    analyze_ssh_logs.MessageType.SUCCESSFUL_LOGIN: logging.info,
+    analyze_ssh_logs.MessageType.CLOSED_CONNECTION: logging.info,
+    analyze_ssh_logs.MessageType.UNSUCCESSFUL_LOGIN: logging.warning,
+    analyze_ssh_logs.MessageType.INCORRECT_USERNAME: logging.error,
+    analyze_ssh_logs.MessageType.INCORRECT_PASSWORD: logging.error,
+    analyze_ssh_logs.MessageType.BREAK_IN_ATTEMPT: logging.critical
+}
+
 
 def configure_logging(minimal_level=logging.DEBUG):
     logging_format = '%(levelname)s: %(asctime)s - %(message)s'
@@ -37,7 +46,6 @@ def compute_bytes(log_entry):
 def log_bytes_read(log_entry):
     logging.debug(f"Bytes read: {compute_bytes(log_entry)}")
 
-
 def log_data(log_entry, display=False):
 
     mssg_type = analyze_ssh_logs.get_message_type(log_entry)
@@ -48,16 +56,8 @@ def log_data(log_entry, display=False):
     if display:
         value += f", '{log_entry.message[:40]} [...]'"
 
-    if mssg_type == analyze_ssh_logs.MessageType.SUCCESSFUL_LOGIN \
-            or mssg_type == analyze_ssh_logs.MessageType.CLOSED_CONNECTION:
-        logging.info(value)
-    elif mssg_type == analyze_ssh_logs.MessageType.UNSUCCESSFUL_LOGIN:
-        logging.warning(value)
-    elif mssg_type == analyze_ssh_logs.MessageType.INCORRECT_USERNAME \
-            or mssg_type == analyze_ssh_logs.MessageType.INCORRECT_PASSWORD:
-        logging.error(value)
-    elif mssg_type == analyze_ssh_logs.MessageType.BREAK_IN_ATTEMPT:
-        logging.critical(value)
+    if mssg_type in OPERATIONS:
+        OPERATIONS.get(mssg_type)(log_entry)
 
 
 def log_debug(message):
