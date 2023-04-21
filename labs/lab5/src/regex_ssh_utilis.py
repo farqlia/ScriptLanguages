@@ -1,11 +1,18 @@
+import re
 from enum import Enum, auto
 from labs.lab5.src.ssh_logs_prepare import *
+from ipaddress import ip_address
 
-ip_part = "(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])"
-IPV4_PATTERN = re.compile(rf"({ip_part}\.{ip_part}\.{ip_part}\.{ip_part})[$|\D]")
+ip_part = ""
+IPV4_PATTERN = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 # Don't want to catch ruser and user authentication
-USER_PATTERN = re.compile(r"((?<=[^r]user[\s=])(?!authentication)\s*\w+|root)")
+# |for (?<!invalid user )[\w\-.]+
+USER_PATTERN = re.compile(r"((?<=[^r]user[\s=])(?!authentication)\s*[\w\-.]+|root)")
+USER_PATTERN_2 = re.compile(r"for ([\w\-.]+)")
 
+PORT_PATTERN = re.compile(r"port (\d+)")
+# error: [\w\s:.]+:(?P<cause>\w+)
+ERROR_CAUSE_PATTERN = re.compile(r"error: (?P<event>received disconnect|connect_to)[\w\s:.]+: (?P<cause>[\w\s]+)")
 
 class MessageType(Enum):
     BREAK_IN_ATTEMPT = auto()
@@ -31,17 +38,41 @@ MESSAGE_PATTERNS = [(MessageType.BREAK_IN_ATTEMPT, re.compile("break[\s\-]?in"))
 
 def get_ipv4s_from_log(entry):
     matches = re.findall(IPV4_PATTERN, entry.message)
+    for match in matches:
+        try:
+            ip_address(match)
+        except ValueError:
+            return None
     return matches
 
 
 def get_user_from_log(entry):
     match = re.search(USER_PATTERN, entry.message)
-    return match.group(0).strip() if match else None
+    if not match:
+        match = re.search(USER_PATTERN_2, entry.message)
+    return match.group(1).strip() if match else None
+
 
 
 def filter_user_logs(user, ssh_logs):
     return list(filter(lambda e: get_user_from_log(e) == user,
                 ssh_logs))
+
+
+def get_port(entry):
+    match = re.search(PORT_PATTERN, entry.message)
+    return int(match.group(1)) if match else None
+
+
+def get_error_cause(entry):
+    match = re.search(ERROR_CAUSE_PATTERN, entry.message.lower())
+    if match:
+        if match.group('event') == 'connect_to':
+            return "connection: " + match.group('cause')
+        else:
+            return match.group('event') + ": " + match.group('cause').strip()
+
+    return ""
 
 
 def get_message_type(entry):

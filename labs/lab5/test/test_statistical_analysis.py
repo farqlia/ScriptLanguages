@@ -2,7 +2,7 @@ import math
 
 import labs.lab5.src.statistical_analysis as statistical_analysis
 import labs.lab5.src.ssh_logs_prepare as ssh_logs_prepare
-import labs.lab5.src.regex_ssh_analysis as regex_ssh_analysis
+import labs.lab5.src.regex_ssh_utilis as regex_ssh_analysis
 
 import pytest
 from pathlib import Path

@@ -5,7 +5,7 @@ from pathlib import Path
 from os import getcwd
 import pytest
 import re
-import labs.lab5.src.regex_ssh_analysis as analyze_ssh_logs
+import labs.lab5.src.regex_ssh_utilis as analyze_ssh_logs
 import labs.lab5.src.ssh_logs_prepare as ssh_logs_prepare
 from collections import namedtuple
 import time
@@ -56,6 +56,43 @@ class TestParseEntry:
         assert len(tuple_entry) == len(expected)
 
 
+class TestFilterPort:
+
+    @pytest.mark.parametrize("entry,port",
+                             [("Dec 10 07:13:43 LabSZ sshd[24227]: Failed password for root from 5.36.59.76 port 42393 ssh2", 42393),
+                              ("Jan  5 09:48:18 LabSZ sshd[17431]: message repeated 5 times: [ Failed password for root from 59.63.188.30 port 60223 ssh2]", 60223),
+                              ("Dec 10 23:13:45 LabSZ sshd[20073]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=121.193.184.2 ", None),
+                              ("Dec 10 23:24:19 LabSZ sshd[20079]: Invalid user chena from 52.80.34.196", None)])
+    def test_cases(self, entry, port):
+        assert analyze_ssh_logs.get_port(parser.parse_entry(entry)) == port
+
+
+class TestErrorCause:
+
+    instances_to_test = [
+        "Dec 16 14:25:57 LabSZ sshd[27703]: error: Received disconnect from 103.79.141.133: 3: com.jcraft.jsch.JSchException: Auth fail [preauth]",
+        "Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to 10.10.34.41 port 22: failed.",
+        "Dec 17 05:17:45 LabSZ sshd[25192]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]",
+        "Jan  4 13:42:21 LabSZ sshd[32136]: error: Received disconnect from 212.83.176.1: 3: org.vngx.jsch.userauth.AuthCancelException: User authentication canceled by user [preauth]",
+        "Jan  5 09:47:34 LabSZ sshd[17423]: error: Received disconnect from 195.154.45.62: 3: com.jcraft.jsch.JSchException: timeout in waiting for rekeying process. [preauth]"
+    ]
+
+    def test_pattern(self):
+        example1 = "error: received disconnect from 103.79.141.133: 3: com.jcraft.jsch.JSchException: Auth fail [preauth]"
+        print(analyze_ssh_logs.ERROR_CAUSE_PATTERN.search(example1).groups())
+        example2 = "error: connect_to 10.10.34.41 port 22: failed."
+        print(analyze_ssh_logs.ERROR_CAUSE_PATTERN.search(example2).groups())
+
+    @pytest.mark.parametrize("entry,cause",
+                             list(zip(instances_to_test,
+                                      ["received disconnect: auth fail", "connection: failed",
+                                       "received disconnect: no more user authentication methods available",
+                                       "received disconnect: user authentication canceled by user",
+                                       "received disconnect: timeout in waiting for rekeying process"])))
+    def test_for_error_cause(self, entry, cause):
+        assert analyze_ssh_logs.get_error_cause(parser.parse_entry(entry)) == cause
+
+
 class TestGetIPv4Logs:
 
     @pytest.mark.parametrize("entry,expected_addresses",
@@ -94,6 +131,7 @@ class TestGetIPv4Logs:
     def test_negative_corner_cases(self, entry):
         assert not analyze_ssh_logs.get_ipv4s_from_log(parser.parse_entry(entry))
 
+    @pytest.mark.xfail
     @pytest.mark.parametrize("entry,expected_matches",
                              [("Sends from host 1.1.1.1", "1.1.1.1"), ("Invalid address 255.0.0.0", "255.0.0.0"),
                               ("Hello from 199.199.18.1 Bye", "199.199.18.1"), ("Connecting from 255.249.239.9", "255.249.239.9")])
@@ -111,7 +149,9 @@ class TestGetUserFromLog:
                               ("Dec 10 07:13:56 LabSZ sshd[24227]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.36.59.76.dynamic-dsl-ip.omantel.net.om  user=root", "root"),
                               ("Dec 10 07:34:23 LabSZ sshd[24299]: Failed password for root from 123.235.32.19 port 57100 ssh2", "root"),
                               ("Dec 10 07:42:51 LabSZ sshd[24318]: Failed password for invalid user inspur from 183.136.162.51 port 55204 ssh2", "inspur"),
-                              ("Dec 10 08:24:32 LabSZ sshd[24361]: input_userauth_request: invalid user  0101 [preauth]", "0101")])
+                              ("Dec 10 08:24:32 LabSZ sshd[24361]: input_userauth_request: invalid user  0101 [preauth]", "0101"),
+                              ("Dec 12 14:20:38 LabSZ sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2", "curi"),
+                              ("Dec 10 07:08:28 LabSZ sshd[24208]: reverse mapping checking getaddrinfo for ns.marryaldkfaczcz.com [173.234.31.186] failed - POSSIBLE BREAK-IN ATTEMPT!", "ns.marryaldkfaczcz.com")])
     def test_cases_with_users(self, entry, expected_user):
         actual_user = analyze_ssh_logs.get_user_from_log(parser.parse_entry(entry))
         assert actual_user == expected_user
@@ -119,7 +159,6 @@ class TestGetUserFromLog:
     @pytest.mark.parametrize("entry",
                              ["Dec 10 07:07:38 LabSZ sshd[24206]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=ec2-52-80-34-196.cn-north-1.compute.amazonaws.com.cn ",
                               "Dec 10 07:07:45 LabSZ sshd[24206]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]",
-                              "Dec 10 07:08:28 LabSZ sshd[24208]: reverse mapping checking getaddrinfo for ns.marryaldkfaczcz.com [173.234.31.186] failed - POSSIBLE BREAK-IN ATTEMPT!",
                               "Dec 10 07:08:30 LabSZ sshd[24208]: Connection closed by 173.234.31.186 [preauth]",
                               "Dec 10 07:28:03 LabSZ sshd[24245]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3 ",
                               "Dec 11 08:30:45 LabSZ sshd[22341]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]"])

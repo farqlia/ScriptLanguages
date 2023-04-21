@@ -1,4 +1,4 @@
-import labs.lab5.src.regex_ssh_analysis as regex_ssh_analysis
+import labs.lab5.src.regex_ssh_utilis as regex_ssh_analysis
 from collections import Counter
 
 import random
