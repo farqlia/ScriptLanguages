@@ -10,67 +10,78 @@ parser = Parser()
 class SSHLogEntry(abc.ABC):
 
     @abc.abstractmethod
-    def validate(self, value):
+    def validate(self):
         return False
 
     def __init__(self, entry):
         entry_log = parser.parse_entry(entry)
+        self._raw_log = entry
         self.host = entry_log.host
         self.pid = entry_log.pid
-        self._message = entry_log.message
+        self.message = entry_log.message
         self.date = entry_log.date
         self.ipv4_address = regex_ssh_utils.get_ipv4s_from_log(entry_log)
+        self.ipv4_address = self.ipv4_address[0] if self.ipv4_address else None
 
         # add parsing ipv4 address
 
     @property
-    def message(self):
-        return self._message
+    def raw_log(self):
+        return self._raw_log
 
     @property
     def has_ip(self):
         return self.ipv4_address is not None
 
     def reconstruct(self):
-        return f"{self.date.strftime('%d-%m-%y, %H:%M:%S')} @{self.host} [{self.pid}]: {self.message}"
+        return [self.date, self.host, self.pid, self.message]
 
     def get_ipv4_address(self):
-        return IPv4Address(self.ipv4_address[0]) if self.ipv4_address else None
+        return IPv4Address(self.ipv4_address) if self.ipv4_address else None
 
     def __repr__(self):
-        return f"{self.date.strftime('%b %d %H:%M:%S')} {self.host} sshd[{self.pid}]: {self._message}"
+        return f"{self.date.strftime('%b %d %H:%M:%S')} {self.host} sshd[{self.pid}]: {self.message}"
 
     def __eq__(self, other):
-        return other.host == self.host and other.pid == self.pid \
-               and other.message == self.message and self.date == other.date and self.ipv4_address == other.ipv4_address
+        result = other.host == self.host and other.pid == self.pid \
+                 and other.message == self.message and self.date == other.date and self.ipv4_address == other.ipv4_address
+        return result
 
     def __lt__(self, other):
         return self.date < other.date and self.pid == other.pid
 
     def __gt__(self, other):
-        return
+        return self.date > other.date and self.pid == other.pid
 
 
 class AcceptedPassword(SSHLogEntry):
 
     def __init__(self, entry):
         super().__init__(entry)
-        self.user = regex_ssh_utils.get_user_from_log(self)
-        self.port = regex_ssh_utils.get_port(self)
+        match = regex_ssh_utils.ACCEPTED_PASSWORD_PATTERN.match(self.message)
+        self.user = match.group("user")
+        self.port = int(match.group("port"))
 
-    def validate(self, value):
-        return value.lower().startwith("Accepted password")
+    def validate(self):
+        return self == AcceptedPassword(self.raw_log)
+
+    def __eq__(self, other):
+        return super(AcceptedPassword, self).__eq__(other) and self.user == other.user and self.port == other.port
 
 
 class FailedPassword(SSHLogEntry):
 
     def __init__(self, entry):
         super().__init__(entry)
-        self.user = regex_ssh_utils.get_user_from_log(self)
-        self.port = regex_ssh_utils.get_port(self)
+        match = regex_ssh_utils.FAILED_PASSWORD_PATTERN.search(self.message)
+        self.user = match.group("user")
+        self.port = int(match.group("port"))
 
-    def validate(self, value):
-        return False
+    def validate(self):
+        return self == FailedPassword(self.raw_log)
+
+    def __eq__(self, other):
+        return super(FailedPassword, self).__eq__(other) and self.user == other.user and self.port == other.port
 
 
 class Error(SSHLogEntry):
@@ -79,8 +90,11 @@ class Error(SSHLogEntry):
         super().__init__(entry)
         self.cause = regex_ssh_utils.get_error_cause(self)
 
-    def validate(self, value):
-        return False
+    def validate(self):
+        return self == Error(self.raw_log)
+
+    def __eq__(self, other):
+        return super(Error, self).__eq__(other) and self.cause == other.cause
 
 
 class Other(SSHLogEntry):
@@ -88,5 +102,5 @@ class Other(SSHLogEntry):
     def __init__(self, entry):
         super().__init__(entry)
 
-    def validate(self, value):
+    def validate(self):
         return True

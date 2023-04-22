@@ -14,6 +14,13 @@ PORT_PATTERN = re.compile(r"port (\d+)")
 # error: [\w\s:.]+:(?P<cause>\w+)
 ERROR_CAUSE_PATTERN = re.compile(r"error: (?P<event>received disconnect|connect_to)[\w\s:.]+: (?P<cause>[\w\s]+)")
 
+ACCEPTED_PASSWORD_PATTERN = re.compile(r"Accepted password for (?P<user>\w+) from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<port>\d+) ssh2")
+
+FAILED_PASSWORD_PATTERN = re.compile(r"Failed password for (?P<user>\w+) from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<port>\d+) ssh2")
+
+ERROR_PATTERN = re.compile(r"error: (?:Received disconnect from|connect_to) (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
+
+
 class MessageType(Enum):
     BREAK_IN_ATTEMPT = auto()
     INCORRECT_PASSWORD = auto()
