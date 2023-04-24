@@ -48,10 +48,10 @@ class SSHLogEntry(abc.ABC):
         return result
 
     def __lt__(self, other):
-        return self.date < other.date and self.pid == other.pid
+        return self.date < other.date
 
     def __gt__(self, other):
-        return self.date > other.date and self.pid == other.pid
+        return self.date > other.date
 
 
 class AcceptedPassword(SSHLogEntry):
@@ -59,11 +59,11 @@ class AcceptedPassword(SSHLogEntry):
     def __init__(self, entry):
         super().__init__(entry)
         match = regex_ssh_utils.ACCEPTED_PASSWORD_PATTERN.match(self.message)
-        self.user = match.group("user")
-        self.port = int(match.group("port"))
+        self.user = match.group("user") if match else None
+        self.port = int(match.group("port")) if match else None
 
     def validate(self):
-        return self == AcceptedPassword(self.raw_log)
+        return self.user is not None and self.port is not None and self == AcceptedPassword(self.raw_log)
 
     def __eq__(self, other):
         return super(AcceptedPassword, self).__eq__(other) and self.user == other.user and self.port == other.port
@@ -74,11 +74,11 @@ class FailedPassword(SSHLogEntry):
     def __init__(self, entry):
         super().__init__(entry)
         match = regex_ssh_utils.FAILED_PASSWORD_PATTERN.search(self.message)
-        self.user = match.group("user")
-        self.port = int(match.group("port"))
+        self.user = match.group("user") if match else None
+        self.port = int(match.group("port")) if match else None
 
     def validate(self):
-        return self == FailedPassword(self.raw_log)
+        return self.user is not None and self.port is not None and self == FailedPassword(self.raw_log)
 
     def __eq__(self, other):
         return super(FailedPassword, self).__eq__(other) and self.user == other.user and self.port == other.port
@@ -91,7 +91,7 @@ class Error(SSHLogEntry):
         self.cause = regex_ssh_utils.get_error_cause(self)
 
     def validate(self):
-        return self == Error(self.raw_log)
+        return self.cause is not None and self == Error(self.raw_log)
 
     def __eq__(self, other):
         return super(Error, self).__eq__(other) and self.cause == other.cause

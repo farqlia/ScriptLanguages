@@ -10,8 +10,25 @@ class TestSSHLogJournal:
     pass
 
 
-class TestPasswordJournal:
-    pass
+class TestAcceptedPasswordJournal:
+
+    instances = [
+        "Dec 12 14:20:38 LabSZ sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2",
+        "Dec 13 11:00:22 LabSZ sshd[5459]: Accepted password for zachary from 218.17.80.182 port 50313 ssh2",
+        "Dec 15 10:38:57 LabSZ sshd[16980]: Failed password for zachary from 218.17.80.182 port 60110 ssh2",
+        "Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to 10.10.34.41 port 22: failed."
+    ]
+
+    @pytest.fixture()
+    def empty_instance(self):
+        return ssh_log_journal.AcceptedPasswordJournal()
+
+    @pytest.mark.parametrize("entry,result",
+                             list(zip(instances,
+                                      [True, True, False, False])))
+    def test_only_accepted_password_instances(self, entry, result, empty_instance):
+        assert bool(empty_instance.append(entry)) == result
+
 
 
 class TestOtherJournal:
@@ -27,7 +44,7 @@ class TestOtherJournal:
         "Dec 19 19:53:50 LabSZ sshd[11934]: Invalid user admin from 185.222.209.151"
     ]
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
     def empty_instance(self):
         return ssh_log_journal.OtherJournal()
 
@@ -71,8 +88,9 @@ class TestOtherJournal:
     def test_filter_for_ip(self, ipv4_address, expected, instance):
         assert instance.filter_for_ip(ipv4_address) == expected
 
-    def test_slicing_method(self, instance):
-        print(slice(1, 2, 3).indices(3))
+    def test_slicing_by_index(self, instance):
+        # print(slice(1, 2, 3).indices(3))
+        assert instance[0:-1] == list(map(lambda l: ssh_log_entry.Other(l), TestOtherJournal.instances[0:-1]))
         assert instance[0] == ssh_log_entry.Other(TestOtherJournal.instances[0])
         assert instance[:2] == [ssh_log_entry.Other(TestOtherJournal.instances[0]),
                                 ssh_log_entry.Other(TestOtherJournal.instances[1])]
@@ -82,7 +100,9 @@ class TestOtherJournal:
         assert instance[ipaddress.IPv4Address("182.0.0.0"):] == [ssh_log_entry.Other(TestOtherJournal.instances[-3]),
                                                                   ssh_log_entry.Other(TestOtherJournal.instances[-1])]
         assert instance[ipaddress.IPv4Address("195.154.37.122")] == [ssh_log_entry.Other(TestOtherJournal.instances[-3])]
-        print(instance[ipaddress.IPv4Address("182.0.0.0"):])
+        assert instance[:ipaddress.IPv4Address("5.255.255.255")] == [ssh_log_entry.Other(TestOtherJournal.instances[-4])]
+        print(instance[ipaddress.IPv4Address("0.0.0.0"):ipaddress.IPv4Address("255.255.255.255"):2])
+
 
     def test_slicing_by_date(self, instance):
         assert instance[datetime.datetime(year=2023, month=1, day=1):datetime.datetime(year=2023, month=1, day=10)] \
@@ -93,3 +113,7 @@ class TestOtherJournal:
                         [TestOtherJournal.instances[0], TestOtherJournal.instances[3],
                 TestOtherJournal.instances[4], TestOtherJournal.instances[5],
                 TestOtherJournal.instances[6]]))
+
+        assert instance[datetime.datetime(year=2023, month=1, day=1):] == \
+               [ssh_log_entry.Other(TestOtherJournal.instances[1]),
+                ssh_log_entry.Other(TestOtherJournal.instances[2])]

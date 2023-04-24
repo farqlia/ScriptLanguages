@@ -21,8 +21,10 @@ class SSHLogJournal(abc.ABC):
 
     def append(self, value):
         instance = self._make_instance(value)
-        if instance and instance.validate():
+        is_valid = instance is not None and instance.validate()
+        if is_valid:
             self.container.append(instance)
+        return is_valid
 
     def filter_for_ip(self, ipv4_address):
         try:
@@ -58,6 +60,9 @@ class SSHLogJournal(abc.ABC):
             if isinstance(index.start, IPv4Address) or isinstance(index.stop, IPv4Address):
                 start = ipaddress.IPv4Address("0.0.0.0") if index.start is None else index.start
                 stop = ipaddress.IPv4Address("255.255.255.255") if index.stop is None else index.stop
+                # if index.step is not None and index.step > 0:
+                #     addresses_range = generate_addresses(start, stop, index.step)
+                #     return list(filter(lambda ssh_log: ssh_log in addresses_range, self.container))
                 return list(filter(lambda ssh_log: ssh_log.has_ip and start <= ssh_log.get_ipv4_address() < stop,
                                    self.container))
             elif isinstance(index.start, datetime.datetime) or isinstance(index.stop, datetime.datetime):
@@ -74,6 +79,16 @@ class SSHLogJournal(abc.ABC):
                 return list(filter(lambda ssh_log: ssh_log.date == index, self.container))
             else:
                 return self.container[index]
+
+
+def generate_addresses(step):
+
+    addresses = set()
+    address = IPv4Address("0.0.0.0")
+    while address <= IPv4Address("255.255.255.255") - step:
+        addresses.add(address)
+        address += step
+    return addresses
 
 
 class AcceptedPasswordJournal(SSHLogJournal):

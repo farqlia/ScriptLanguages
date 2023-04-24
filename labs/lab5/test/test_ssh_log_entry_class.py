@@ -40,17 +40,17 @@ class TestSSHLogEntry:
         assert instance.__eq__(other_instance)
 
     @pytest.mark.parametrize("other,result",
-                             [("Dec 14 11:10:00 LabSZ sshd[19465]: Accepted password for curi from 137.189.241.19 port 4300 ssh2", False),
-                              ("Dec 14 11:10:00 LabSZ sshd[8043]: Accepted password for curi from 137.189.241.19 port 4300 ssh2", False),
+                             [("Dec 14 11:10:00 LabSZ sshd[19465]: Accepted password for curi from 137.189.241.19 port 4300 ssh2", True),
+                              ("Dec 14 11:10:00 LabSZ sshd[8043]: Accepted password for curi from 137.189.241.19 port 4300 ssh2", True),
                               ("Dec 14 11:10:00 LabSZ sshd[29040]: Accepted password for curi from 137.189.241.19 port 4300 ssh2", True)])
     def test_magic_method__lt__(self, other, result, instance):
         assert (instance < ssh_log_entry.AcceptedPassword(other)) == result
 
     @pytest.mark.parametrize("other,result",
                              [("Dec 10 11:10:00 LabSZ sshd[19465]: Accepted password for curi from 137.189.241.19 port 4300 ssh2",
-                              False),
+                              True),
                               ("Dec 10 11:10:00 LabSZ sshd[8043]: Accepted password for curi from 137.189.241.19 port 4300 ssh2",
-                              False),
+                              True),
                               ("Dec 10 11:10:00 LabSZ sshd[29040]: Accepted password for curi from 137.189.241.19 port 4300 ssh2",
                               True)])
     def test_magic_method__gt__(self, other, result, instance):
