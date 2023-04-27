@@ -60,7 +60,6 @@ def get_user_from_log(entry):
     return match.group(1).strip() if match else None
 
 
-
 def filter_user_logs(user, ssh_logs):
     return list(filter(lambda e: get_user_from_log(e) == user,
                 ssh_logs))

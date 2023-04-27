@@ -56,7 +56,6 @@ def test_global_connection_times(one_user_entries):
     assert std == math.sqrt(((2 - mean) ** 2 + (2 - mean) ** 2) / 2)
 
 
-
 def test_user_connection_times_2(test_entries_2):
     connection_times = statistical_analysis.user_connection_time(test_entries_2)
     print(connection_times)

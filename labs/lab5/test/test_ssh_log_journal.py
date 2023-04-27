@@ -9,6 +9,8 @@ import ipaddress
 class TestSSHLogJournal:
     pass
 
+def test_generate_addresses():
+    print(ssh_log_journal.generate_addresses(1))
 
 class TestAcceptedPasswordJournal:
 

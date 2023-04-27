@@ -9,6 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/labs/lab4/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/lectures/oop/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/labs/lab5/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/labs/lab7/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/labs/lab1/test/.pytest_cache/v" />
       <excludeFolder url="file://$MODULE_DIR$/labs/lab3/test/.pytest_cache/v" />

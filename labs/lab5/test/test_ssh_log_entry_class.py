@@ -176,6 +176,7 @@ class TestError:
         instance.__setattr__("cause", "couldn't connect")
         assert not instance.validate()
 
+
 # Ignore for now
 class Other:
 
