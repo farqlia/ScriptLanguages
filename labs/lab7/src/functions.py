@@ -31,8 +31,5 @@ def make_alpha_dict(string: str):
 
 
 def flatten(sequence):
-    return [sequence] if not isinstance(sequence, typing.Iterable) else \
-        [elem for compound in sequence for elem in flatten(compound)]
-
-
-
+    return [elem for compound in sequence for elem in flatten(compound)] \
+        if isinstance(sequence, typing.Iterable) else [sequence]

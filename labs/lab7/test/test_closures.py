@@ -20,7 +20,8 @@ def test_generate_fibonacci_nums(n, expected):
 @pytest.mark.parametrize("func,n,expected",
                          [
                              (lambda x: x, 5, [1, 2, 3, 4, 5]),
-                             (lambda q: 2 ** (q - 1), 5, [1, 2, 4, 8, 16])
+                             (lambda q: 2 ** (q - 1), 5, [1, 2, 4, 8, 16]),
+                             (lambda n: n ** 2, 5, [1, 4, 9, 16, 25])
                          ])
 def test_generate_sequence(func, n, expected):
     gen = closures.make_generator(func)
@@ -35,8 +36,8 @@ def test_generate_fibonacci_nums_with_cache():
     sys.setrecursionlimit(100)
     gen = closures.make_generator_mem(closures.fibonacci)
     fibs = []
-    # for i in range(105):
-      #   fibs.append(gen())
+    for i in range(105):
+        fibs.append(gen())
     print(dir(gen))
     print(gen.__closure__[0])
 
@@ -45,6 +46,12 @@ def fibonacci(n):
     if n <= 1:
         return n
     return fibonacci(n - 1) + fibonacci(n - 2)
+
+
+def fibonacci_without_cache(n):
+    if n <= 1:
+        return n
+    return fibonacci_without_cache(n - 1) + fibonacci_without_cache(n - 2)
 
 
 def generate_fibs():
@@ -73,15 +80,21 @@ def test_how_caching_works4():
     # print(gen.cache_parameters)
 
 def test_how_caching_works_2():
-    sys.setrecursionlimit(100)
-    gen = closures.make_generator_mem(closures.fibonacci)
-    sequence = []
+    # sys.setrecursionlimit(100)
+    cached_fib = closures.decorate_with_cache(fibonacci_without_cache)
+    cached_with_annot = fibonacci
+
+    # gen = closures.make_generator_mem(fibonacci_without_cache)
     for i in range(20):
-        print(gen())
+        num = cached_with_annot(i)
+        num2 = cached_fib(i)
+        print(num, num2, end=",")
     # print(dir(gen))
     # print(dir(closures.make_generator_mem))
-    # print(gen.cache_info())
+    print(cached_fib.cache_info())
+    print(cached_with_annot.cache_info())
     # print(closures.make_generator_mem.cache_info())
+
 
 def test_how_caching_works():
     sys.setrecursionlimit(100)
@@ -103,3 +116,9 @@ def test_how_caching_works3():
     print(gen.cache_info())
     print(gen.cache_parameters())
     print(functools.cached_property(gen))
+
+
+def test_how_caching_works_4():
+    cached_fib = functools.cache(fibonacci_without_cache)
+    for i in range(102):
+        print(cached_fib(i), end=",")

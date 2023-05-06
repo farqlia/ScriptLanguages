@@ -20,29 +20,23 @@ def make_generator(func):
     return inner
 
 
-def decorate_with_cache(func):
-
-    @functools.wraps(func)
-    @cache
-    def cached_func(n):
-        return func(n)
-
-    wrapper_with_cache = functools.update_wrapper(cached_func, func)
-    return wrapper_with_cache
-    # return cached_func
+def fibonacci(n):
+    return n if n <= 1 else fibonacci(n - 1) + fibonacci(n - 2)
 
 
 def make_generator_mem(func):
-    n = 0
 
-    func_with_cache = decorate_with_cache(func)
+    cached_func = functools.cache(func)
+    cached_func = functools.wraps(cached_func)
+    # cached_func = functools.update_wrapper(cached_func, func)
+    return make_generator(cached_func)
 
-    def inner():
-        nonlocal n
-        n += 1
-        return func_with_cache(n)
 
-    return inner
+def decorate_with_cache(func):
+
+    cached_func = functools.cache(func)
+    return cached_func
+    # return cached_func
 
 
 def make_generator_mem_inner_annot(func):
@@ -55,14 +49,6 @@ def make_generator_mem_inner_annot(func):
 
     return inner
 
-
-def fibonacci(n):
-    if n == 0:
-        return 0
-    elif n == 1:
-        return 1
-    else:
-        return fibonacci(n - 1) + fibonacci(n - 2)
 
 
 y = 3

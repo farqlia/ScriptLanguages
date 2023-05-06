@@ -10,8 +10,9 @@ import pytest
 def test_acronym(strings, expected):
     assert functions.acronym(strings) == expected
 
+
 @pytest.mark.parametrize("nums,expected",
-                         [([1,1,19,2,3,4,4,5,1], 3),
+                         [([1, 1, 19, 2, 3, 4, 4, 5, 1], 3),
                           ([3, 4, 1, 5, 2, 6], 3.5)])
 def test_median(nums, expected):
     assert functions.median(nums) == expected
