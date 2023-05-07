@@ -57,11 +57,13 @@ if __name__ == "__main__":
 
     # TODO : implement with memoization
     fib_gen_memo = closures.make_generator_mem(closures.fibonacci)
+    gen = fib_gen_memo()
     # print(timeit.timeit('[fib_gen_memo() for _ in range(20)]', number=1, globals=globals()))
     # print(timeit.timeit('[fib_gen_memo() for _ in range(20)]', number=1, globals=globals()))
 
-    # timeit.Timer('for _ in range(20): fib_gen_memo()', 'gc.enable()').timeit(number=1)
-    # timeit.Timer('for _ in range(20): fib_gen_memo()', 'gc.enable()').timeit(number=1)
+    print(timeit.Timer('for _ in range(40): gen()', globals=globals()).timeit(number=1))
+    gen = fib_gen_memo()
+    print(timeit.Timer('for _ in range(40): gen()', globals=globals()).timeit(number=1))
 
     ducks = [Duck("John", 1, ["Carrot", "Bread"]), Duck("Tom", 4, ["Pea"])]
 

@@ -6,6 +6,12 @@ import pytest
 from functools import cache
 
 
+def test_function_inners():
+    print(dir(closures.fibonacci))
+    print(closures.fibonacci.__qualname__)
+    print(closures.fibonacci.__code__)
+
+
 @pytest.mark.parametrize("n,expected",
                          [(7, [1, 1, 2, 3, 5, 8, 13])])
 def test_generate_fibonacci_nums(n, expected):
@@ -34,10 +40,18 @@ def test_generate_sequence(func, n, expected):
 
 def test_generate_fibonacci_nums_with_cache():
     sys.setrecursionlimit(100)
-    gen = closures.make_generator_mem(closures.fibonacci)
+    gen_wrapper = closures.make_generator_mem(closures.fibonacci)
+    gen = gen_wrapper()
     fibs = []
-    for i in range(105):
+
+    for i in range(20):
         fibs.append(gen())
+
+
+    gen = gen_wrapper()
+    for i in range(20):
+        gen()
+
     print(dir(gen))
     print(gen.__closure__[0])
 

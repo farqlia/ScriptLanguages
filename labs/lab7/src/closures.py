@@ -10,6 +10,7 @@ from functools import cache
 
 
 def make_generator(func):
+
     n = 0
 
     def inner():
@@ -27,9 +28,12 @@ def fibonacci(n):
 def make_generator_mem(func):
 
     cached_func = functools.cache(func)
-    cached_func = functools.wraps(cached_func)
+    # cached_func = functools.wraps(cached_func)
+
+    def gen_with_memo():
+        return make_generator(cached_func)
     # cached_func = functools.update_wrapper(cached_func, func)
-    return make_generator(cached_func)
+    return gen_with_memo
 
 
 def decorate_with_cache(func):
