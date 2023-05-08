@@ -27,14 +27,14 @@ def fibonacci(n):
     return n if n <= 1 else fibonacci(n - 1) + fibonacci(n - 2)
 
 
+# to nie jest generator tak naprawdę
 def make_generator_mem(func):
 
     cached_func = functools.cache(func)
-    # cached_func = functools.wraps(cached_func)
 
     def gen_with_memo():
         return make_generator(cached_func)
-    # cached_func = functools.update_wrapper(cached_func, func)
+
     return gen_with_memo
 
 

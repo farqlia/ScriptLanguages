@@ -58,7 +58,13 @@ if __name__ == "__main__":
     except StopIteration:
         print("Generated all passwords")
 
+    powers_of_2 = closures.make_generator(lambda n: 2 ** n)
+
+    for _ in range(10):
+        print(next(powers_of_2))
+
     fib_gen = closures.make_generator(closures.fibonacci)
+
     for _ in range(10):
         print(next(fib_gen))
 

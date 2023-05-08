@@ -45,15 +45,12 @@ def test_generate_fibonacci_nums_with_cache():
     fibs = []
 
     for i in range(20):
-        fibs.append(gen())
+        fibs.append(next(gen))
 
 
     gen = gen_wrapper()
     for i in range(20):
-        gen()
-
-    print(dir(gen))
-    print(gen.__closure__[0])
+        next(gen)
 
 @cache
 def fibonacci(n):
@@ -134,5 +131,5 @@ def test_how_caching_works3():
 
 def test_how_caching_works_4():
     cached_fib = functools.cache(fibonacci_without_cache)
-    for i in range(102):
-        print(cached_fib(i), end=",")
+    # for i in range(102):
+      #   print(cached_fib(i), end=",")

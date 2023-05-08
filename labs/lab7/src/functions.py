@@ -24,13 +24,8 @@ def sqrt_newton(num, epsilon):
 
 
 def make_alpha_dict(string: str):
-    ''''''
-    strings = re.split(NON_WORDS, string)
-    letters = set(re.sub(NON_WORDS, "", string))
-    # alpha_dict = {k: list(filter(lambda s: k in s, strings)) for k in letters}
-
-    alpha_dict = {k: list(filter(lambda s: k in s, strings)) for k in letters}
-    return alpha_dict
+    return {k: list(filter(lambda s: k in s, re.split(NON_WORDS, string)))
+            for k in set(re.sub(NON_WORDS, "", string))}
 
 
 def flatten(sequence):
