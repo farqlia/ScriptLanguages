@@ -7,7 +7,7 @@ import pytest
                              ([-1, 0, 1, 2], False),
                              ([0], False)
                          ])
-def test_forall_are_greater_than_0(sequence, result):
+def test_all_are_greater_than_0(sequence, result):
     assert higher_order_functions.forall(lambda x: x > 0, sequence) == result
 
 

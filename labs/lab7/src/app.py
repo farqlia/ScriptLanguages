@@ -15,6 +15,7 @@ class Duck:
         self.name = name
         self.age = age
         self.fav_food = fav_food
+        # hatching
         time.sleep(0.5)
 
     def quack(self):
@@ -28,6 +29,12 @@ def kill_ducks(ducks: typing.List[Duck], n_tortures=999):
             duck.quack()
 
     return len(ducks)
+
+
+@log(logging.INFO)
+def generate_fibs_up_to(n, generator):
+    for _ in range(n):
+        next(generator)
 
 
 if __name__ == "__main__":
@@ -53,17 +60,12 @@ if __name__ == "__main__":
 
     fib_gen = closures.make_generator(closures.fibonacci)
     for _ in range(10):
-        print(fib_gen())
+        print(next(fib_gen))
 
-    # TODO : implement with memoization
     fib_gen_memo = closures.make_generator_mem(closures.fibonacci)
-    gen = fib_gen_memo()
-    # print(timeit.timeit('[fib_gen_memo() for _ in range(20)]', number=1, globals=globals()))
-    # print(timeit.timeit('[fib_gen_memo() for _ in range(20)]', number=1, globals=globals()))
 
-    print(timeit.Timer('for _ in range(40): gen()', globals=globals()).timeit(number=1))
-    gen = fib_gen_memo()
-    print(timeit.Timer('for _ in range(40): gen()', globals=globals()).timeit(number=1))
+    generate_fibs_up_to(35, fib_gen_memo())
+    generate_fibs_up_to(35, fib_gen_memo())
 
     ducks = [Duck("John", 1, ["Carrot", "Bread"]), Duck("Tom", 4, ["Pea"])]
 

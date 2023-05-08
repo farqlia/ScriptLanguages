@@ -1,3 +1,6 @@
+import logging
+import time
+
 import labs.lab7.src.log_decorator as log_decorator
 import pytest
 import labs.lab5.src.ssh_user as ssh_user
@@ -16,5 +19,13 @@ def test_type_of_definition():
     assert regex_ssh_utilis.get_error_cause.__class__ == types.FunctionType
 
 
+def test_log_decorator():
+
+    def slow_function():
+        time.sleep(3)
+        print("Finished")
+
+    slow_f = log_decorator.log(logging.WARNING)(slow_function)
+    slow_f()
 
 

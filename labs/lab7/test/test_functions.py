@@ -41,7 +41,8 @@ def test_make_alpha_dict(string,expected):
 @pytest.mark.parametrize("sequence,expected",
                          (
                              ([1, [2, 3], [[4, 5], 6]], [1, 2, 3, 4, 5, 6]),
-                             ([[[2]], [3, 4], [[5], 6]], [2, 3, 4, 5, 6])
+                             ([[[2]], [3, 4], [[5], 6]], [2, 3, 4, 5, 6]),
+                             (((1, 2), 4, (5, (6,))), [1, 2, 4, 5, 6])
                          ))
 def test_flatten(sequence, expected):
     assert functions.flatten(sequence) == expected

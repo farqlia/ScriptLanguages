@@ -18,7 +18,7 @@ def test_generate_fibonacci_nums(n, expected):
     gen = closures.make_generator(closures.fibonacci)
     fibs = []
     for i in range(7):
-        fibs.append(gen())
+        fibs.append(next(gen))
 
     assert fibs == expected
 
@@ -33,7 +33,7 @@ def test_generate_sequence(func, n, expected):
     gen = closures.make_generator(func)
     sequence = []
     for i in range(n):
-        sequence.append(gen())
+        sequence.append(next(gen))
 
     assert sequence == expected
 

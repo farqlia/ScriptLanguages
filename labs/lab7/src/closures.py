@@ -9,16 +9,18 @@ from functools import cache
 # 4. local
 
 
+# Domknięcie polega na odniesieniu się w funkcji wewnętrznej
+# do zmiennych z funkcji zewnętrznej i w ten sposób nawet po
+# zakończeniu wywołania tej funkcji zmienne są dostępne
 def make_generator(func):
 
-    n = 0
-
     def inner():
-        nonlocal n
-        n += 1
-        return func(n)
+        n = 1
+        while True:
+            yield func(n)
+            n += 1
 
-    return inner
+    return inner()
 
 
 def fibonacci(n):

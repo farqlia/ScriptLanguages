@@ -10,9 +10,9 @@ def acronym(strings):
 
 
 def median(nums):
-    nums = sorted(nums)
-    n_half = len(nums) // 2
-    return nums[n_half] if len(nums) % 2 == 1 else sum(nums[n_half - 1: n_half + 1]) / 2
+    sorted_nums = sorted(nums)
+    n_half = len(sorted_nums) // 2
+    return sorted_nums[n_half] if len(sorted_nums) % 2 == 1 else sum(sorted_nums[n_half - 1: n_half + 1]) / 2
 
 
 def sqrt_newton(num, epsilon):
@@ -24,8 +24,11 @@ def sqrt_newton(num, epsilon):
 
 
 def make_alpha_dict(string: str):
+    ''''''
     strings = re.split(NON_WORDS, string)
     letters = set(re.sub(NON_WORDS, "", string))
+    # alpha_dict = {k: list(filter(lambda s: k in s, strings)) for k in letters}
+
     alpha_dict = {k: list(filter(lambda s: k in s, strings)) for k in letters}
     return alpha_dict
 
