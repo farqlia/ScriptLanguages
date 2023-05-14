@@ -21,6 +21,7 @@ class SSHLogsHandler(LogHandler):
         journal = SSHLogJournal()
         if not path.exists():
             logging.warning(f"Couldn't open {path}")
+            return None
         else:
             with open(path) as f:
                 for line in f:

@@ -32,7 +32,7 @@ class MessageType(Enum):
     OTHER = auto()
 
     def format(self):
-        return self.name.replace(r"\w+", " ").lower()
+        return self.name.replace(r"_", " ").lower()
 
 
 MESSAGE_PATTERNS = [(MessageType.BREAK_IN_ATTEMPT, re.compile("break[\s\-]?in")),
@@ -85,7 +85,6 @@ def get_error_cause(entry):
 def get_message_type(entry):
 
     message = entry.message.lower().strip()
-
     for k, v in MESSAGE_PATTERNS:
         if v.search(message):
             return k
