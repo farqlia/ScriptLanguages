@@ -1,3 +1,5 @@
+import datetime
+
 from PySide6.QtWidgets import QWidget, QListWidget, QVBoxLayout, QHBoxLayout, QDateTimeEdit, QLabel, QGridLayout
 from PySide6.QtCore import QSize, Qt, QDateTime
 from labs.ssh_logs_program.src.view.utils import to_datetime, to_q_datetime
@@ -13,16 +15,17 @@ class MasterWidget(QWidget):
 
         self.detail_widget = detail_widget
 
-        self.datetime_from = None
-        self.datetime_to = None
+        dt_from = (2022, 12, 10, 8, 0, 0)
+        dt_to = (2022, 12, 10, 10, 0, 0)
+        self.datetime_from = datetime.datetime(*dt_from)
+        self.datetime_to = datetime.datetime(*dt_to)
 
         self.widget_list = QListWidget()
 
         self.datetime_widget_from = QDateTimeEdit()
-        current_q_datetime = QDateTime.currentDateTime()
-        self.datetime_widget_from.setDateTime(current_q_datetime.addYears(-2))
+        self.datetime_widget_from.setDateTime(QDateTime(*dt_from))
         self.datetime_widget_to = QDateTimeEdit()
-        self.datetime_widget_to.setDateTime(current_q_datetime)
+        self.datetime_widget_to.setDateTime(QDateTime(*dt_to))
 
         datetime_from_widget = QWidget()
         datetime_from_layout = QHBoxLayout()
@@ -63,7 +66,7 @@ class MasterWidget(QWidget):
     def items(self, items):
         self._items = items
         self._currently_displayed = items
-        self.update_view()
+        self._set_new_date_range()
         # self.widget_list.addItems(journal)
 
     def update_view(self):

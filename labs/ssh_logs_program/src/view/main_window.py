@@ -1,5 +1,7 @@
+import os
 import sys
 from pathlib import Path
+from os import access, R_OK, EX_OK
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import QMainWindow, QPushButton, QApplication, QVBoxLayout, QWidget, QGridLayout, QLineEdit, \
@@ -7,10 +9,13 @@ from PySide6.QtWidgets import QMainWindow, QPushButton, QApplication, QVBoxLayou
 from labs.ssh_logs_program.src.view import master_widget, detail_widget
 from labs.ssh_logs_program.src.model import ssh_log_journal, read_logs_from_file, log_factory
 
-# Signals are usually send by users
+# Signals are usually send by widgets and triggered by users
+# Events are user interactions with Qt App
 # Slots are receivers of signals
 
 # TODO: set limits on dates and font/style
+
+DATA_DIR = str(Path(__file__).parents[2] / 'data')
 
 
 class MainWindow(QMainWindow):
@@ -27,13 +32,16 @@ class MainWindow(QMainWindow):
 
         open_widget = QWidget()
         self.open_entry = QLineEdit(open_widget)
+        self.open_file_dialog_button = QPushButton(open_widget)
+        self.open_file_dialog_button.setText("File Dialog")
         self.open_button = QPushButton(open_widget)
         self.open_button.setText("Open")
         open_widget_layout = QGridLayout()
         open_widget_layout.rowStretch(1)
         open_widget_layout.columnStretch(6)
         open_widget_layout.addWidget(self.open_entry, 0, 0)
-        open_widget_layout.addWidget(self.open_button, 0, 5)
+        open_widget_layout.addWidget(self.open_button, 0, 3)
+        open_widget_layout.addWidget(self.open_file_dialog_button, 0, 5)
         open_widget.setLayout(open_widget_layout)
 
         data_widget = QWidget()
@@ -78,24 +86,31 @@ class MainWindow(QMainWindow):
         # self.open_button.clicked.connect(self.read_data_from_file)
         self.next_button.clicked.connect(self.next_item)
         self.prev_button.clicked.connect(self.previous_item)
-        self.open_button.clicked.connect(self.read_data_from_file)
+        self.open_button.clicked.connect(self.read_data_from_given_path)
+        self.open_file_dialog_button.clicked.connect(self.read_data_with_file_dialog)
 
-    def read_data_from_file(self):
+    def read_data_from_given_path(self):
         self.filename = self.open_entry.text()
-        if len(self.filename) == 0:
-            self.open_file_dialog()
-        elif not Path(self.filename).exists():
+        path = Path(self.filename)
+        # Why this is not working
+        if not path.exists() or not os.access(path, R_OK):
             self.filename = None
             self.display_error_msg()
+        else:
+            self.update_data()
 
-        if self.filename:
-            self.container = self.data_handler.read_from_file(self.filename)
-            self.master_widget.items = self.container
-            self.master_widget.set_current_row(0)
+    def update_data(self):
+        self.container = self.data_handler.read_from_file(self.filename)
+        self.master_widget.items = self.container
+        self.master_widget.set_current_row(0)
+
+    def read_data_with_file_dialog(self):
+        self.open_file_dialog()
+        self.update_data()
 
     def open_file_dialog(self):
         dialog = QFileDialog(self)
-        dialog.setDirectory(r'C:\Users\julia\PycharmProjects\ScriptLanguages\labs\ssh_logs_program\data')
+        dialog.setDirectory(DATA_DIR)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         dialog.setNameFilter("*.log")
         if dialog.exec():
@@ -127,21 +142,6 @@ class MainWindow(QMainWindow):
         elif not self.next_button.isEnabled():
             self.next_button.setEnabled(True)
 
-
-class ErrorDialog(QDialog):
-
-    def __init__(self, msg):
-        super(ErrorDialog, self).__init__()
-        self.setWindowTitle("Error")
-        qbtn = QDialogButtonBox.StandardButton.Ok
-        self.buttonBox = QDialogButtonBox(qbtn)
-        self.buttonBox.accepted.connect(self.accept)
-
-        self.layout = QVBoxLayout()
-        message = QLabel(msg)
-        self.layout.addWidget(message)
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.layout)
 
 if __name__ == "__main__":
 
