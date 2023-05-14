@@ -1,16 +1,19 @@
 import datetime
 
 import pytest
-import labs.lab5.src.ssh_log_entry as ssh_log_entry
-import labs.lab5.src.ssh_log_journal as ssh_log_journal
+import labs.ssh_logs_program.src.model.ssh_log_entry as ssh_log_entry
+import labs.ssh_logs_program.src.model.ssh_log_journal as ssh_log_journal
+import labs.ssh_logs_program.src.model.log_factory as log_factory
 import ipaddress
 
 
 class TestSSHLogJournal:
     pass
 
-def test_generate_addresses():
-    print(ssh_log_journal.generate_addresses(1))
+
+# def test_generate_addresses():
+#     print(ssh_log_journal.generate_addresses(1))
+
 
 class TestAcceptedPasswordJournal:
 
@@ -23,13 +26,18 @@ class TestAcceptedPasswordJournal:
 
     @pytest.fixture()
     def empty_instance(self):
-        return ssh_log_journal.AcceptedPasswordJournal()
+       return ssh_log_journal.SSHLogJournal()
+
+    @pytest.fixture()
+    def creator(self):
+        return log_factory.AcceptedPasswordCreator()
+
 
     @pytest.mark.parametrize("entry,result",
                              list(zip(instances,
                                       [True, True, False, False])))
-    def test_only_accepted_password_instances(self, entry, result, empty_instance):
-        assert bool(empty_instance.append(entry)) == result
+    def test_only_accepted_password_instances(self, entry, result, empty_instance, creator):
+        assert bool(empty_instance.append(entry, creator)) == result
 
 
 
@@ -48,17 +56,22 @@ class TestOtherJournal:
 
     @pytest.fixture()
     def empty_instance(self):
-        return ssh_log_journal.OtherJournal()
+        return ssh_log_journal.SSHLogJournal()
+
+    @pytest.fixture(scope="class")
+    def creator(self):
+        return log_factory.OtherCreator()
+
 
     @pytest.fixture()
-    def instance(self, empty_instance):
+    def instance(self, empty_instance, creator):
         for entry in TestOtherJournal.instances:
-            empty_instance.append(entry)
+            empty_instance.append(entry, creator)
         return empty_instance
 
     @pytest.mark.parametrize("entry", instances)
-    def test_append_method(self, entry, empty_instance):
-        assert empty_instance.append(entry)
+    def test_append_method(self, entry, empty_instance, creator):
+        assert empty_instance.append(entry, creator)
 
     def test_length_method(self, instance):
         assert len(instance) == len(TestOtherJournal.instances)
@@ -81,41 +94,41 @@ class TestOtherJournal:
 
         in_jan = lambda e: e.date.month == 1
         filtered = instance.filter(in_jan)
-        assert filtered == [ssh_log_entry.Other("Jan  3 18:15:58 LabSZ sshd[5518]: pam_unix(sshd:auth): check pass; user unknown"),
+        assert filtered.container == [ssh_log_entry.Other("Jan  3 18:15:58 LabSZ sshd[5518]: pam_unix(sshd:auth): check pass; user unknown"),
                             ssh_log_entry.Other("Jan  3 18:16:11 LabSZ sshd[5514]: PAM service(sshd) ignoring max retries; 6 > 3")]
 
     @pytest.mark.parametrize("ipv4_address,expected",
                              [("181.214.87.4", [ssh_log_entry.Other(instances[0])]),
                               ("0.0.0.0", [])])
     def test_filter_for_ip(self, ipv4_address, expected, instance):
-        assert instance.filter_for_ip(ipv4_address) == expected
+        assert instance.filter_for_ip(ipv4_address).container == expected
 
     def test_slicing_by_index(self, instance):
         # print(slice(1, 2, 3).indices(3))
-        assert instance[0:-1] == list(map(lambda l: ssh_log_entry.Other(l), TestOtherJournal.instances[0:-1]))
+        assert instance[0:-1].container == list(map(lambda l: ssh_log_entry.Other(l), TestOtherJournal.instances[0:-1]))
         assert instance[0] == ssh_log_entry.Other(TestOtherJournal.instances[0])
-        assert instance[:2] == [ssh_log_entry.Other(TestOtherJournal.instances[0]),
+        assert instance[:2].container == [ssh_log_entry.Other(TestOtherJournal.instances[0]),
                                 ssh_log_entry.Other(TestOtherJournal.instances[1])]
-        assert instance[::-1] == list(map(lambda l: ssh_log_entry.Other(l), TestOtherJournal.instances[::-1]))
+        assert instance[::-1].container == list(map(lambda l: ssh_log_entry.Other(l), TestOtherJournal.instances[::-1]))
 
     def test_slicing_by_ipv4_address(self, instance):
-        assert instance[ipaddress.IPv4Address("182.0.0.0"):] == [ssh_log_entry.Other(TestOtherJournal.instances[-3]),
+        assert instance[ipaddress.IPv4Address("182.0.0.0"):].container == [ssh_log_entry.Other(TestOtherJournal.instances[-3]),
                                                                   ssh_log_entry.Other(TestOtherJournal.instances[-1])]
-        assert instance[ipaddress.IPv4Address("195.154.37.122")] == [ssh_log_entry.Other(TestOtherJournal.instances[-3])]
-        assert instance[:ipaddress.IPv4Address("5.255.255.255")] == [ssh_log_entry.Other(TestOtherJournal.instances[-4])]
+        assert instance[ipaddress.IPv4Address("195.154.37.122")].container == [ssh_log_entry.Other(TestOtherJournal.instances[-3])]
+        assert instance[:ipaddress.IPv4Address("5.255.255.255")].container == [ssh_log_entry.Other(TestOtherJournal.instances[-4])]
         print(instance[ipaddress.IPv4Address("0.0.0.0"):ipaddress.IPv4Address("255.255.255.255"):2])
 
 
     def test_slicing_by_date(self, instance):
-        assert instance[datetime.datetime(year=2023, month=1, day=1):datetime.datetime(year=2023, month=1, day=10)] \
+        assert instance[datetime.datetime(year=2023, month=1, day=1):datetime.datetime(year=2023, month=1, day=10)].container \
                == [ssh_log_entry.Other(TestOtherJournal.instances[1]), ssh_log_entry.Other(TestOtherJournal.instances[2])]
 
-        assert instance[:datetime.datetime(year=2022, month=12, day=15)] == \
+        assert instance[:datetime.datetime(year=2022, month=12, day=15)].container == \
                list(map(lambda l: ssh_log_entry.Other(l),
                         [TestOtherJournal.instances[0], TestOtherJournal.instances[3],
                 TestOtherJournal.instances[4], TestOtherJournal.instances[5],
                 TestOtherJournal.instances[6]]))
 
-        assert instance[datetime.datetime(year=2023, month=1, day=1):] == \
+        assert instance[datetime.datetime(year=2023, month=1, day=1):].container == \
                [ssh_log_entry.Other(TestOtherJournal.instances[1]),
                 ssh_log_entry.Other(TestOtherJournal.instances[2])]

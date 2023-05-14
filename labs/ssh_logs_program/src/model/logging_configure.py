@@ -1,6 +1,7 @@
 import logging
 import sys
-import labs.lab5.src.regex_ssh_utilis as analyze_ssh_logs
+
+import labs.ssh_logs_program.src.model.regex_ssh_utilis as analyze_ssh_logs
 
 OPERATIONS = {
     analyze_ssh_logs.MessageType.SUCCESSFUL_LOGIN: logging.info,

@@ -1,6 +1,6 @@
-from subprocess import run
 from os import getcwd
 from pathlib import Path
+from subprocess import run
 
 if __name__ == "__main__":
     ssh_logs = Path(getcwd()).parent.joinpath('data', 'SSH.tar.gz')

@@ -1,10 +1,8 @@
 import ipaddress
 from datetime import datetime
 
-import labs.lab5.src.ssh_log_entry as ssh_log_entry
-import labs.lab5.src.ssh_log_journal as ssh_log_journal
-from labs.lab5.src.ssh_user import SSHUser
-
+import labs.ssh_logs_program.src.model.ssh_log_journal as ssh_log_journal
+from labs.ssh_logs_program.src.model.ssh_user import SSHUser
 
 if __name__ == "__main__":
 

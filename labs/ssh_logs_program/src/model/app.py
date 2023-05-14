@@ -1,12 +1,12 @@
+import argparse
 import logging
 import os.path
 import sys
 
-import labs.lab5.src.regex_ssh_utilis as analyze_ssh_logs
-import labs.lab5.src.statistical_analysis as statistical_analysis
-import labs.lab5.src.ssh_logs_prepare as ssh_logs_prepare
-import labs.lab5.src.logging_configure as logging_module
-import argparse
+import labs.ssh_logs_program.src.model.logging_configure as logging_module
+import labs.ssh_logs_program.src.model.regex_ssh_utilis as analyze_ssh_logs
+import labs.ssh_logs_program.src.model.ssh_logs_prepare as ssh_logs_prepare
+import labs.ssh_logs_program.src.model.statistical_analysis as statistical_analysis
 
 
 class Application:

@@ -1,6 +1,5 @@
-import ipaddress
-import re
 import datetime
+import re
 
 
 class SSHUser:

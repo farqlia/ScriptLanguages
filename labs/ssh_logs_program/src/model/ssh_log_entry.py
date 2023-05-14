@@ -1,7 +1,8 @@
 import abc
 from ipaddress import IPv4Address
-from labs.lab5.src.ssh_logs_prepare import Parser
-import labs.lab5.src.regex_ssh_utilis as regex_ssh_utils
+
+import labs.ssh_logs_program.src.model.regex_ssh_utilis as regex_ssh_utils
+from labs.ssh_logs_program.src.model.ssh_logs_prepare import Parser
 
 parser = Parser()
 
@@ -38,6 +39,9 @@ class SSHLogEntry(abc.ABC):
 
     def get_ipv4_address(self):
         return IPv4Address(self.ipv4_address) if self.ipv4_address else None
+
+    def __str__(self):
+        return self._raw_log
 
     def __repr__(self):
         return f"{self.date.strftime('%b %d %H:%M:%S')} {self.host} sshd[{self.pid}]: {self.message}"

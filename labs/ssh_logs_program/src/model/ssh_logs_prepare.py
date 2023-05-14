@@ -1,7 +1,6 @@
-import re
-import time
-from collections import namedtuple
 import datetime
+import re
+from collections import namedtuple
 
 
 class Parser:

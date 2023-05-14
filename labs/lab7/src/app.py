@@ -1,9 +1,9 @@
 import time
 
-from log_decorator import log
+from labs.lab7.src.log_decorator import log
 import typing
 import logging
-import password_generator
+import labs.lab7.src.password_generator
 import closures
 import timeit
 
@@ -18,8 +18,15 @@ class Duck:
         # hatching
         time.sleep(0.5)
 
+    def set_friend(self, friend: "Duck"):
+        self.friend = friend
+        friend.friend = self
+
+    def set_quack(self, quack: typing.Callable[[], None]):
+        self._quack = quack
+
     def quack(self):
-        return "quack"
+        self._quack()
 
 
 @log(logging.WARNING)

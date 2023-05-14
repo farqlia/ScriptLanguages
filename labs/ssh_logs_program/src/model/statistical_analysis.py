@@ -1,8 +1,8 @@
-import labs.lab5.src.regex_ssh_utilis as regex_ssh_analysis
-from collections import Counter
-
 import random
 import statistics
+from collections import Counter
+
+import labs.ssh_logs_program.src.model.regex_ssh_utilis as regex_ssh_analysis
 
 
 def get_random_user(users):

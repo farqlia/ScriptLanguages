@@ -5,11 +5,11 @@ from pathlib import Path
 from os import getcwd
 import pytest
 import re
-import labs.lab5.src.regex_ssh_utilis as analyze_ssh_logs
-import labs.lab5.src.ssh_logs_prepare as ssh_logs_prepare
+import labs.ssh_logs_program.src.model.regex_ssh_utilis as analyze_ssh_logs
+import labs.ssh_logs_program.src.model.ssh_logs_prepare as ssh_logs_prepare
 from collections import namedtuple
 import time
-import labs.lab5.src.app as app
+import labs.ssh_logs_program.src.model.app as app
 import datetime
 
 DATA_DIR = Path(getcwd()).parent.joinpath('data')

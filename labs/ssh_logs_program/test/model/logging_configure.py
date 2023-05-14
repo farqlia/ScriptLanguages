@@ -1,6 +1,6 @@
 import sys
 
-import labs.lab5.src.logging_configure as logging_configure
+import labs.ssh_logs_program.src.model.logging_configure as logging_configure
 import logging
 
 logger = logging.getLogger(__name__)

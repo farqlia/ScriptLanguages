@@ -8,8 +8,8 @@
       <sourceFolder url="file://$MODULE_DIR$/lectures/the_py_std_lib/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/labs/lab4/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/lectures/oop/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/labs/lab5/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/labs/lab7/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/labs/ssh_logs_program/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/labs/lab1/test/.pytest_cache/v" />
       <excludeFolder url="file://$MODULE_DIR$/labs/lab3/test/.pytest_cache/v" />
@@ -18,9 +18,9 @@
       <excludeFolder url="file://$MODULE_DIR$/challenges/.pytest_cache/v" />
       <excludeFolder url="file://$MODULE_DIR$/labs/lab4/test/.pytest_cache/v" />
       <excludeFolder url="file://$MODULE_DIR$/labs/lab4/data" />
-      <excludeFolder url="file://$MODULE_DIR$/labs/lab5/test/.pytest_cache/v" />
-      <excludeFolder url="file://$MODULE_DIR$/labs/lab5/data" />
       <excludeFolder url="file://$MODULE_DIR$/lectures/filesystems/.pytest_cache/v" />
+      <excludeFolder url="file://$MODULE_DIR$/labs/ssh_logs_program/test/.pytest_cache/v" />
+      <excludeFolder url="file://$MODULE_DIR$/labs/ssh_logs_program/data" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (ScriptLanguages) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

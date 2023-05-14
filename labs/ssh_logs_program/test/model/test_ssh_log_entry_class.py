@@ -1,10 +1,10 @@
 import pytest
-import labs.lab5.src.ssh_log_entry as ssh_log_entry
+import labs.ssh_logs_program.src.model.ssh_log_entry as ssh_log_entry
 import datetime
 from ipaddress import IPv4Address
-import labs.lab5.src.regex_ssh_utilis as regex_ssh_utilis
+import labs.ssh_logs_program.src.model.regex_ssh_utilis as regex_ssh_utilis
 
-from labs.lab5.src.ssh_logs_prepare import Parser
+from labs.ssh_logs_program.src.model.ssh_logs_prepare import Parser
 
 
 # Dec 14 16:02:42 LabSZ sshd[10327]: fatal: Read from socket failed: Connection reset by peer [preauth] ??

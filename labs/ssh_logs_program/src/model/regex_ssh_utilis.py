@@ -1,7 +1,8 @@
 import re
 from enum import Enum, auto
-from labs.lab5.src.ssh_logs_prepare import *
 from ipaddress import ip_address
+
+from labs.ssh_logs_program.src.model.ssh_logs_prepare import *
 
 ip_part = ""
 IPV4_PATTERN = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
