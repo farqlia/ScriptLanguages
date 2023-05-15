@@ -14,8 +14,6 @@ from labs.ssh_logs_program.src.model import ssh_log_journal, read_logs_from_file
 # Events are user interactions with Qt App
 # Slots are receivers of signals
 
-# TODO: set limits on dates and font/style
-
 DATA_DIR = str(Path(__file__).parents[2] / 'data')
 
 
@@ -91,7 +89,7 @@ class MainWindow(QMainWindow):
         self.open_file_dialog_button.clicked.connect(self.read_data_with_file_dialog)
 
     def read_data_from_given_path(self):
-        self.filename = Path(self.open_entry.text())
+        self.filename = Path(self.open_entry.text().strip())
         # Why this is not working
         if self.check_file_correctness():
             self.update_data()
@@ -107,21 +105,21 @@ class MainWindow(QMainWindow):
             self.master_widget.items = self.container
             self.master_widget.set_current_row(0)
         except ValueError:
-            self.display_error_msg("Couldn't parse file")
+            self.display_error_msg(f"Couldn't parse file: {self.filename}")
+        except Exception:
+            self.display_error_msg(f"Unknown error occured")
 
     def check_file_correctness(self):
-        can_open = True
         if not self.data_handler.is_correct_extension(self.filename):
-            can_open = self.display_yes_no_choice_dialog(f"File {self.filename} is not of correct type."
-                                          f" Do you want to open it?")
-            if not can_open:
+            if not self.display_yes_no_choice_dialog(f"File {self.filename} is not of correct type."
+                                          f" Do you want to open it?"):
                 return False
 
-        can_open = self.data_handler.can_be_opened(self.filename)
-        if not can_open:
+        if not self.data_handler.can_be_opened(self.filename):
             self.display_error_msg(f"Couldn't open: {self.filename}")
+            return False
 
-        return can_open
+        return True
 
     def open_file_dialog(self):
         dialog = QFileDialog(self)

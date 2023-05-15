@@ -15,17 +15,12 @@ class MasterWidget(QWidget):
 
         self.detail_widget = detail_widget
 
-        dt_from = (2022, 12, 10, 8, 0, 0)
-        dt_to = (2022, 12, 10, 10, 0, 0)
-        self.datetime_from = datetime.datetime(*dt_from)
-        self.datetime_to = datetime.datetime(*dt_to)
-
         self.widget_list = QListWidget()
 
         self.datetime_widget_from = QDateTimeEdit()
-        self.datetime_widget_from.setDateTime(QDateTime(*dt_from))
+        self.datetime_widget_from.setDateTime(QDateTime(2022, 12, 10, 8, 25, 0))
         self.datetime_widget_to = QDateTimeEdit()
-        self.datetime_widget_to.setDateTime(QDateTime(*dt_to))
+        self.datetime_widget_to.setDateTime(QDateTime(2022, 12, 10, 9, 30, 0))
 
         datetime_from_widget = QWidget()
         datetime_from_layout = QHBoxLayout()
@@ -43,8 +38,8 @@ class MasterWidget(QWidget):
         datetimes_layout = QGridLayout()
         datetimes_layout.rowStretch(1)
         datetimes_layout.columnStretch(6)
-        datetimes_layout.addWidget(datetime_from_widget, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        datetimes_layout.addWidget(datetime_to_widget, 0, 2, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
+        datetimes_layout.addWidget(datetime_from_widget, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        datetimes_layout.addWidget(datetime_to_widget, 0, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         datetimes_widget.setLayout(datetimes_layout)
 
         layout = QVBoxLayout()
@@ -53,8 +48,8 @@ class MasterWidget(QWidget):
 
         self.widget_list.itemClicked.connect(self.dispatch_to_detail_view)
         self.widget_list.itemSelectionChanged.connect(self.dispatch_to_detail_view)
-        self.datetime_widget_from.dateTimeChanged.connect(self.filter_from)
-        self.datetime_widget_to.dateTimeChanged.connect(self.filter_to)
+        self.datetime_widget_from.dateTimeChanged.connect(self._set_new_date_range)
+        self.datetime_widget_to.dateTimeChanged.connect(self._set_new_date_range)
 
         self.setLayout(layout)
 
@@ -88,16 +83,8 @@ class MasterWidget(QWidget):
     def get_current_row(self):
         return self.widget_list.currentRow()
 
-    def filter_from(self, q_datetime: QDateTime):
-        self.datetime_from = to_datetime(q_datetime)
-        self._set_new_date_range()
-
-    def filter_to(self, q_datetime: QDateTime):
-        self.datetime_to = to_datetime(q_datetime)
-        self._set_new_date_range()
-
     def _set_new_date_range(self):
-        self._currently_displayed = self._items[self.datetime_from:self.datetime_to]
+        self._currently_displayed = self._items[self.datetime_widget_from.dateTime().toPython():self.datetime_widget_to.dateTime().toPython()]
         self.update_view()
 
     def clear(self):

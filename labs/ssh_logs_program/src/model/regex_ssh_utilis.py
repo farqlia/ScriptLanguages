@@ -32,7 +32,7 @@ class MessageType(Enum):
     OTHER = auto()
 
     def format(self):
-        return self.name.replace(r"_", " ").lower()
+        return self.name.replace(r"_", " ").lower().capitalize()
 
 
 MESSAGE_PATTERNS = [(MessageType.BREAK_IN_ATTEMPT, re.compile("break[\s\-]?in")),

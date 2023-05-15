@@ -40,6 +40,6 @@ class Parser:
         host = get_user_from_str(entry)
 
         return Parser.log_entry(date=self.get_date(match),
-                                host=host if host else "UNKNOWN",
+                                host=host if host else "",
                                 pid=int(match.group('pid')),
                                 message=match.group('message'))
