@@ -11,7 +11,7 @@ class MasterWidget(QWidget):
         super().__init__()
 
         self._items = None
-        self._currently_displayed = None
+        self.currently_displayed = None
 
         self.detail_widget = detail_widget
 
@@ -60,14 +60,15 @@ class MasterWidget(QWidget):
     @items.setter
     def items(self, items):
         self._items = items
-        self._currently_displayed = items
+        self.currently_displayed = items
         self._set_new_date_range()
         # self.widget_list.addItems(journal)
 
     def update_view(self):
         self.widget_list.clear()
-        for item in self._currently_displayed:
-            self.widget_list.addItem(str(item)[:60] + "...")
+        if self.currently_displayed:
+            for item in self.currently_displayed:
+                self.widget_list.addItem(str(item)[:60] + "...")
         # self.widget_list.show()
 
     def dispatch_to_detail_view(self):
@@ -84,7 +85,8 @@ class MasterWidget(QWidget):
         return self.widget_list.currentRow()
 
     def _set_new_date_range(self):
-        self._currently_displayed = self._items[self.datetime_widget_from.dateTime().toPython():self.datetime_widget_to.dateTime().toPython()]
+        if self._items:
+            self.currently_displayed = self._items[self.datetime_widget_from.dateTime().toPython():self.datetime_widget_to.dateTime().toPython()]
         self.update_view()
 
     def clear(self):

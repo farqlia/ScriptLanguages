@@ -8,7 +8,7 @@ from labs.ssh_logs_program.src.model import regex_ssh_utilis
 class DetailWidget(QWidget):
 
     def __init__(self):
-        super(DetailWidget, self).__init__()
+        super().__init__()
 
         details_widget = QWidget()
 
@@ -65,14 +65,17 @@ class DetailWidget(QWidget):
         self.pid_widget.setText(str(item.pid))
         self.host_widget.setText(item.host)
         self.date_widget.setText(str(item.date))
-        self.ipv4_address_widget.setText(item.ipv4_address if item.has_ip else "unknown")
+        self.ipv4_address_widget.setText(item.ipv4_address if item.has_ip else "")
         self.message_widget.setText(item.message)
         self.type_widget.setText(regex_ssh_utilis.get_message_type(item).format())
 
     def clear(self):
-        self.pid_widget.clear()
-        self.host_widget.clear()
-        self.date_widget.clear()
-        self.ipv4_address_widget.clear()
-        self.message_widget.clear()
+        self.pid_widget.setText("")
+        self.host_widget.setText("")
+        self.date_widget.setText("")
+        self.ipv4_address_widget.setText("")
+        self.message_widget.setText("")
+
+        # self.pid_widget.show()
+        # self.host_widget.show()
 

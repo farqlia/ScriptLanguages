@@ -9,10 +9,10 @@ import abc
 class LogHandler(abc.ABC):
 
     def read_from_file(self, path) -> LogJournal:
-        pass
+        return None
 
     def is_correct_extension(self, path):
-        pass
+        return False
 
     def can_be_opened(self, path):
         return False

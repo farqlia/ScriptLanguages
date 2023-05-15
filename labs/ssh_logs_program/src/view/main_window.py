@@ -73,30 +73,30 @@ class MainWindow(QMainWindow):
 
         widget = QWidget()
         self.layout = QGridLayout()
-        self.layout.rowStretch(6)
+        self.layout.rowStretch(7)
         self.layout.columnStretch(6)
+
         self.layout.addWidget(open_widget, 0, 0, 1, 6)
-        self.layout.addWidget(data_widget, 1, 0, 4, 6)
-        self.layout.addWidget(navigation_button_widget, 5, 0, 1, 6)
+        self.layout.addWidget(data_widget, 2, 0, 4, 6)
+        self.layout.addWidget(navigation_button_widget, 6, 0, 1, 6)
 
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
-        # self.open_button.clicked.connect(self.read_data_from_file)
         self.next_button.clicked.connect(self.next_item)
         self.prev_button.clicked.connect(self.previous_item)
         self.open_button.clicked.connect(self.read_data_from_given_path)
         self.open_file_dialog_button.clicked.connect(self.read_data_with_file_dialog)
 
+        self.clear()
+
     def read_data_from_given_path(self):
         self.filename = Path(self.open_entry.text().strip())
-        # Why this is not working
         if self.check_file_correctness():
             self.update_data()
 
     def read_data_with_file_dialog(self):
-        self.open_file_dialog()
-        if self.check_file_correctness():
+        if self.open_file_dialog() and self.check_file_correctness():
             self.update_data()
 
     def update_data(self):
@@ -104,6 +104,7 @@ class MainWindow(QMainWindow):
             self.container = self.data_handler.read_from_file(self.filename)
             self.master_widget.items = self.container
             self.master_widget.set_current_row(0)
+            self.enable_buttons()
         except ValueError:
             self.display_error_msg(f"Couldn't parse file: {self.filename}")
         except Exception:
@@ -131,6 +132,8 @@ class MainWindow(QMainWindow):
             print(filenames)
             if filenames:
                 self.filename = Path(filenames[0])
+                return True
+        return False
 
     def display_error_msg(self, msg=""):
         dlg = QMessageBox(self)
@@ -163,9 +166,21 @@ class MainWindow(QMainWindow):
         elif not self.next_button.isEnabled():
             self.next_button.setEnabled(True)
 
+    def disable_buttons(self):
+        self.next_button.setEnabled(False)
+        self.prev_button.setEnabled(False)
+
+    def enable_buttons(self):
+        self.next_button.setEnabled(True)
+        self.prev_button.setEnabled(True)
+
     def clear(self):
         self.detail_widget.clear()
+        self.detail_widget.show()
         self.master_widget.clear()
+        self.master_widget.items = None
+        self.master_widget.currently_displayed = None
+        self.disable_buttons()
 
 
 if __name__ == "__main__":
