@@ -2,7 +2,7 @@ import re
 from enum import Enum, auto
 from ipaddress import ip_address
 
-from labs.ssh_logs_program.src.model.ssh_logs_prepare import *
+# from labs.ssh_logs_program.src.model.ssh_logs_prepare import *
 
 ip_part = ""
 IPV4_PATTERN = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
@@ -58,6 +58,13 @@ def get_user_from_log(entry):
     match = re.search(USER_PATTERN, entry.message)
     if not match:
         match = re.search(USER_PATTERN_2, entry.message)
+    return match.group(1).strip() if match else None
+
+
+def get_user_from_str(entry):
+    match = re.search(USER_PATTERN, entry)
+    if not match:
+        match = re.search(USER_PATTERN_2, entry)
     return match.group(1).strip() if match else None
 
 

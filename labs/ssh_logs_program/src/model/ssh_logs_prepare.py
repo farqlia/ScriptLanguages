@@ -1,6 +1,7 @@
 import datetime
 import re
 from collections import namedtuple
+from labs.ssh_logs_program.src.model.regex_ssh_utilis import get_user_from_str
 
 
 class Parser:
@@ -30,12 +31,15 @@ class Parser:
         return f"{log.date.strftime('%d-%m-%y, %H:%M:%S')}, [{log.pid}] - {log.message[:length]} [...]"
 
     def parse_entry(self, entry):
+        entry = entry.strip()
         match = re.match(Parser.PATTERN, entry)
 
         if not match:
             raise ValueError(f"Couldn't parse: {entry}")
 
+        host = get_user_from_str(entry)
+
         return Parser.log_entry(date=self.get_date(match),
-                                host=match.group('host'),
+                                host=host if host else "UNKNOWN",
                                 pid=int(match.group('pid')),
                                 message=match.group('message'))

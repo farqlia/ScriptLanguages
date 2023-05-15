@@ -99,3 +99,6 @@ class MasterWidget(QWidget):
     def _set_new_date_range(self):
         self._currently_displayed = self._items[self.datetime_from:self.datetime_to]
         self.update_view()
+
+    def clear(self):
+        self.widget_list.clear()

@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from os import access, R_OK, EX_OK
+import labs.ssh_logs_program.src.model.logging_configure as logging_configure
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import QMainWindow, QPushButton, QApplication, QVBoxLayout, QWidget, QGridLayout, QLineEdit, \
@@ -90,43 +91,65 @@ class MainWindow(QMainWindow):
         self.open_file_dialog_button.clicked.connect(self.read_data_with_file_dialog)
 
     def read_data_from_given_path(self):
-        self.filename = self.open_entry.text()
-        path = Path(self.filename)
+        self.filename = Path(self.open_entry.text())
         # Why this is not working
-        if not path.exists() or not os.access(path, R_OK):
-            self.filename = None
-            self.display_error_msg()
-        else:
+        if self.check_file_correctness():
             self.update_data()
-
-    def update_data(self):
-        self.container = self.data_handler.read_from_file(self.filename)
-        self.master_widget.items = self.container
-        self.master_widget.set_current_row(0)
 
     def read_data_with_file_dialog(self):
         self.open_file_dialog()
-        self.update_data()
+        if self.check_file_correctness():
+            self.update_data()
+
+    def update_data(self):
+        try:
+            self.container = self.data_handler.read_from_file(self.filename)
+            self.master_widget.items = self.container
+            self.master_widget.set_current_row(0)
+        except ValueError:
+            self.display_error_msg("Couldn't parse file")
+
+    def check_file_correctness(self):
+        can_open = True
+        if not self.data_handler.is_correct_extension(self.filename):
+            can_open = self.display_yes_no_choice_dialog(f"File {self.filename} is not of correct type."
+                                          f" Do you want to open it?")
+            if not can_open:
+                return False
+
+        can_open = self.data_handler.can_be_opened(self.filename)
+        if not can_open:
+            self.display_error_msg(f"Couldn't open: {self.filename}")
+
+        return can_open
 
     def open_file_dialog(self):
         dialog = QFileDialog(self)
         dialog.setDirectory(DATA_DIR)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
-        dialog.setNameFilter("*.log")
+        # dialog.setNameFilter("*.log")
         if dialog.exec():
             filenames = dialog.selectedFiles()
             print(filenames)
             if filenames:
-                self.filename = filenames[0]
+                self.filename = Path(filenames[0])
 
-    def display_error_msg(self):
+    def display_error_msg(self, msg=""):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Error")
-        dlg.setText("Couldn't open a file")
+        dlg.setText(msg)
         dlg.setStandardButtons(QMessageBox.StandardButton.Ok)
         dlg.setIcon(QMessageBox.Icon.Warning)
         dlg.exec()
         self.open_entry.clear()
+
+    def display_yes_no_choice_dialog(self, msg):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Question")
+        dlg.setText(msg)
+        dlg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        dlg.setIcon(QMessageBox.Icon.Question)
+        return dlg.exec() == QMessageBox.StandardButton.Yes
 
     def next_item(self):
         is_next = self.master_widget.set_current_row(self.master_widget.get_current_row() + 1)
@@ -142,8 +165,14 @@ class MainWindow(QMainWindow):
         elif not self.next_button.isEnabled():
             self.next_button.setEnabled(True)
 
+    def clear(self):
+        self.detail_widget.clear()
+        self.master_widget.clear()
+
 
 if __name__ == "__main__":
+
+    logging_configure.configure_logging()
 
     app = QApplication(sys.argv)
 
