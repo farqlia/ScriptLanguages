@@ -2,14 +2,20 @@ import datetime
 import re
 from collections import namedtuple
 from labs.ssh_logs_program.src.model.regex_ssh_utilis import get_user_from_str
+from typing import NamedTuple
+
+
+class LogEntry(NamedTuple):
+    date: datetime.datetime
+    host: str
+    pid: int
+    message: str
 
 
 class Parser:
 
     PATTERN = re.compile("(?P<date>\w+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+"
                      "(?P<host>\w*)\s*sshd\[(?P<pid>\d+)]:\s+(?P<message>.+)")
-
-    log_entry = namedtuple("SSH_Entry", "date host pid message")
 
     def __init__(self):
         self.curr_year = 2022
@@ -27,7 +33,7 @@ class Parser:
                                  minute=date.minute, hour=date.hour, second=date.second)
         return date
 
-    def frmt(self, log: log_entry, length=30):
+    def frmt(self, log: LogEntry, length=30):
         return f"{log.date.strftime('%d-%m-%y, %H:%M:%S')}, [{log.pid}] - {log.message[:length]} [...]"
 
     def parse_entry(self, entry):

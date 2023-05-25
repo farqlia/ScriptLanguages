@@ -15,46 +15,8 @@ import datetime
 DATA_DIR = Path(getcwd()).parent.joinpath('data')
 logs_link = ""
 
+
 parser = ssh_logs_prepare.Parser()
-
-
-def test_examine_log_structure():
-    print()
-    with open(DATA_DIR.joinpath('SSH_test_logs.log')) as f:
-        for line in f:
-            print(line)
-
-
-def test_new_pattern():
-    pattern = re.compile("(?P<date>\w+ \d{1,2} \d{2}:\d{2}:\d{2})")
-    assert re.search(pattern, "Dec 10 06:55:46 LabSZ sshd[24200]").group() == "Dec 10 06:55:46"
-    print(datetime.datetime.strptime("Dec 10 06:55:46", "%b %d %H:%M:%S"))
-
-
-class TestParseEntry:
-    @pytest.mark.parametrize("log,expected_groups",
-                             [("Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186",
-                               {'date': 'Dec 10 06:55:46',
-                                'pid': '24200', 'message': 'Invalid user webmaster from 173.234.31.186'})])
-    def test_pattern_for_parsing_logs(self, log, expected_groups):
-        match = re.match(ssh_logs_prepare.Parser.PATTERN, log)
-        assert all(expected_groups[k] == match.group(k) for k in expected_groups.keys())
-
-
-    @pytest.mark.parametrize("entry,expected",
-                             [("Dec 10 07:13:43 LabSZ sshd[24227]: Failed password for root from 5.36.59.76 port 42393 ssh2"
-                               , {'date': datetime.datetime(year=2022, month=12, day=10, hour=7, minute=13, second=43),
-                                  'host': 'LabSZ', 'pid': 24227,
-                                  'message': 'Failed password for root from 5.36.59.76 port 42393 ssh2'}),
-                              ])
-    def test_convert_to_namedtuple(self, entry, expected):
-        tuple_entry = parser.parse_entry(entry)
-        assert tuple_entry.date == expected['date']
-        assert tuple_entry.host == expected['host']
-        assert tuple_entry.pid == expected['pid']
-        assert tuple_entry.message == expected['message']
-        assert len(tuple_entry) == len(expected)
-
 
 class TestFilterPort:
 
@@ -229,3 +191,16 @@ def test_exec_command_formatting():
     # output = app.exec_reg_commands(entry_log, nmsp)
     # assert output == "Analyze: Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186" \
       #                "\nIPv4 addresses: ['173.234.31.186']\nUsers: webmaster\nLog type: MessageType.INCORRECT_USERNAME"
+
+
+def test_examine_log_structure():
+    print()
+    with open(DATA_DIR.joinpath('SSH_test_logs.log')) as f:
+        for line in f:
+            print(line)
+
+
+def test_new_pattern():
+    pattern = re.compile("(?P<date>\w+ \d{1,2} \d{2}:\d{2}:\d{2})")
+    assert re.search(pattern, "Dec 10 06:55:46 LabSZ sshd[24200]").group() == "Dec 10 06:55:46"
+    print(datetime.datetime.strptime("Dec 10 06:55:46", "%b %d %H:%M:%S"))

@@ -4,17 +4,18 @@ from labs.ssh_logs_program.src.model.ssh_log_journal import LogJournal, SSHLogJo
 from labs.ssh_logs_program.src.model.log_factory import OtherCreator
 import logging
 import abc
+from typing import Union, Optional
 
 
 class LogHandler(abc.ABC):
 
-    def read_from_file(self, path) -> LogJournal:
+    def read_from_file(self, path: Union[Path, str]) -> Optional[LogJournal]:
         return None
 
-    def is_correct_extension(self, path):
+    def is_correct_extension(self, path: Union[Path, str]) -> bool:
         return False
 
-    def can_be_opened(self, path):
+    def can_be_opened(self, path: Union[Path, str]) -> bool:
         return False
 
 
@@ -23,7 +24,7 @@ class SSHLogsHandler(LogHandler):
     def __init__(self):
         self.creator = OtherCreator()
 
-    def read_from_file(self, path):
+    def read_from_file(self, path: Union[Path, str]) -> Optional[LogJournal]:
         path = Path(path)
         journal = SSHLogJournal()
         if not path.exists():
@@ -42,9 +43,9 @@ class SSHLogsHandler(LogHandler):
 
         return journal
 
-    def is_correct_extension(self, path):
+    def is_correct_extension(self, path: Union[Path, str]) -> bool:
         return Path(path).suffix == ".log"
 
-    def can_be_opened(self, path):
+    def can_be_opened(self, path: Union[Path, str]) -> bool:
         path = Path(path)
         return path.is_file() and access(path, R_OK)

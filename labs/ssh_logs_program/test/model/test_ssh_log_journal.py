@@ -5,14 +5,28 @@ import labs.ssh_logs_program.src.model.ssh_log_entry as ssh_log_entry
 import labs.ssh_logs_program.src.model.ssh_log_journal as ssh_log_journal
 import labs.ssh_logs_program.src.model.log_factory as log_factory
 import ipaddress
+from ipaddress import IPv4Address
 
 
-class TestSSHLogJournal:
-    pass
+class TestAppend:
 
+    @pytest.fixture()
+    def journal(self):
+        return ssh_log_journal.SSHLogJournal()
 
-# def test_generate_addresses():
-#     print(ssh_log_journal.generate_addresses(1))
+    @pytest.mark.parametrize("case,creator,expected_type", [
+        ("Dec 12 14:20:38 LabSZ sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2",
+         log_factory.AcceptedPasswordCreator(), ssh_log_entry.AcceptedPassword),
+        ("Dec 15 10:38:57 LabSZ sshd[16980]: Failed password for zachary from 218.17.80.182 port 60110 ssh2",
+         log_factory.FailedPasswordCreator(), ssh_log_entry.FailedPassword),
+        ("Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to 10.10.34.41 port 22: failed.",
+         log_factory.ErrorCreator(), ssh_log_entry.Error),
+        ("Jan  3 18:15:58 LabSZ sshd[5518]: pam_unix(sshd:auth): check pass; user unknown",
+         log_factory.OtherCreator(), ssh_log_entry.Other)
+    ])
+    def test_verify_type(self, case, creator, expected_type, journal):
+        journal.append(case, creator)
+        assert isinstance(journal[0], expected_type)
 
 
 class TestAcceptedPasswordJournal:
@@ -40,7 +54,6 @@ class TestAcceptedPasswordJournal:
         assert bool(empty_instance.append(entry, creator)) == result
 
 
-
 class TestOtherJournal:
 
     instances = [
@@ -61,7 +74,6 @@ class TestOtherJournal:
     @pytest.fixture(scope="class")
     def creator(self):
         return log_factory.OtherCreator()
-
 
     @pytest.fixture()
     def instance(self, empty_instance, creator):
@@ -99,9 +111,14 @@ class TestOtherJournal:
 
     @pytest.mark.parametrize("ipv4_address,expected",
                              [("181.214.87.4", [ssh_log_entry.Other(instances[0])]),
-                              ("0.0.0.0", [])])
+                              ("0.0.0.0", []),
+                              (IPv4Address("181.214.87.4"), [ssh_log_entry.Other(instances[0])])])
     def test_filter_for_ip(self, ipv4_address, expected, instance):
         assert instance.filter_for_ip(ipv4_address).container == expected
+
+    def test_filter_for_illegal_input_ip(self, instance):
+        ipv4_address = "256.53.32.11"
+        assert instance.filter_for_ip(ipv4_address) == []
 
     def test_slicing_by_index(self, instance):
         # print(slice(1, 2, 3).indices(3))

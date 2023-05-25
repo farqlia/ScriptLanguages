@@ -1,6 +1,8 @@
 import re
 from enum import Enum, auto
-from ipaddress import ip_address
+from ipaddress import ip_address, IPv4Address
+from typing import List, Union
+# from labs.ssh_logs_program.src.model.ssh_log_entry import Parser
 
 # from labs.ssh_logs_program.src.model.ssh_logs_prepare import *
 
@@ -8,8 +10,9 @@ ip_part = ""
 IPV4_PATTERN = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 # Don't want to catch ruser and user authentication
 # |for (?<!invalid user )[\w\-.]+
-USER_PATTERN = re.compile(r"((?<=[^r]user[\s=])(?!authentication)\s*[\w\-.]+|root)")
-USER_PATTERN_2 = re.compile(r"for ([\w\-.]+)")
+USER_PATTERNS = [re.compile(r"((?<=[^r]user[\s=])(?!authentication)\s*[\w\-.]+|root)"),
+                 re.compile(r"for ([\w\-.]+)")]
+
 
 PORT_PATTERN = re.compile(r"port (\d+)")
 # error: [\w\s:.]+:(?P<cause>\w+)
@@ -44,7 +47,7 @@ MESSAGE_PATTERNS = [(MessageType.BREAK_IN_ATTEMPT, re.compile("break[\s\-]?in"))
                     (MessageType.OTHER, re.compile(".*"))]
 
 
-def get_ipv4s_from_log(entry):
+def get_ipv4s_from_log(entry) -> Union[List[IPv4Address], None]:
     matches = re.findall(IPV4_PATTERN, entry.message)
     for match in matches:
         try:
@@ -55,17 +58,15 @@ def get_ipv4s_from_log(entry):
 
 
 def get_user_from_log(entry):
-    match = re.search(USER_PATTERN, entry.message)
-    if not match:
-        match = re.search(USER_PATTERN_2, entry.message)
-    return match.group(1).strip() if match else None
+    return get_user_from_str(entry.message)
 
 
 def get_user_from_str(entry):
-    match = re.search(USER_PATTERN, entry)
-    if not match:
-        match = re.search(USER_PATTERN_2, entry)
-    return match.group(1).strip() if match else None
+    for pattern in USER_PATTERNS:
+        match = re.search(pattern, entry)
+        if match:
+            return match.group(1).strip()
+    return None
 
 
 def filter_user_logs(user, ssh_logs):
