@@ -10,6 +10,10 @@ Protocols were added for static type analysis & explicit subtyping of
 classes declared as protocols (otherwise, even if all methods are compatible,
 the class is not considered a subtype)
 It is possible to subclass a Protocol, but it is not necessary to
+
+Weak and strong typing are not officially agreed upon, but they 
+are used to say how strong are the assumptions about the types. It includes
+implicit conversions. 
 '''
 
 # Add this annotation since Protocols can't be instantiated directly
