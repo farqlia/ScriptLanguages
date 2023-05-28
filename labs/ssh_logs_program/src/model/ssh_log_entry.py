@@ -24,8 +24,8 @@ class SSHLogEntry(abc.ABC):
         self.pid: int = entry_log.pid
         self.message: str = entry_log.message
         self.date: datetime = entry_log.date
-        ipv4_address: Optional[List[IPv4Address]] = regex_ssh_utils.get_ipv4s_from_log(entry_log)
-        self.ipv4_address: Optional[IPv4Address] = ipv4_address[0] if ipv4_address else None
+        ipv4_address: Optional[List[str]] = regex_ssh_utils.get_ipv4s_from_log(entry_log)
+        self.ipv4_address: Optional[IPv4Address] = IPv4Address(ipv4_address[0]) if ipv4_address else None
 
         # add parsing ipv4 address
 
@@ -75,7 +75,7 @@ class AcceptedPassword(SSHLogEntry):
     def __eq__(self, other: object) -> bool:
         is_type: bool = isinstance(other, AcceptedPassword)
         if is_type:
-            other_match: Optional[Match[str]] = regex_ssh_utils.ACCEPTED_PASSWORD_PATTERN.match(other.message)  # type: ignore
+            other_match: Optional[Match[str]] = regex_ssh_utils.ACCEPTED_PASSWORD_PATTERN.match(getattr(other, "message"))
             return other_match is not None and super(AcceptedPassword, self).__eq__(other) \
                    and self.port == int(other_match.group('port'))
         return False
@@ -94,7 +94,7 @@ class FailedPassword(SSHLogEntry):
     def __eq__(self, other: object) -> bool:
         is_type: bool = isinstance(other, FailedPassword)
         if is_type:
-            other_match: Optional[Match[str]] = regex_ssh_utils.FAILED_PASSWORD_PATTERN.match(other.message)    # type: ignore
+            other_match: Optional[Match[str]] = regex_ssh_utils.FAILED_PASSWORD_PATTERN.match(getattr(other, "message"))
             return other_match is not None and super(FailedPassword, self).__eq__(other) and self.port == int(
                 other_match.group('port'))
         return False

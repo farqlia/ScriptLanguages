@@ -1,10 +1,13 @@
+import csv
+
 import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 import os
 from labs.lab10.bikes_database.rents_metadata import Rental, Station, Base, Bike
 from datetime import datetime
-from labs.lab10.bikes_database.load_data import get_object_and_create_if_not_exist, add_rental_data_to_db
+from labs.lab10.bikes_database.load_data import get_object_and_create_if_not_exist, \
+    add_rental_data_to_db, validate, load_from_file
 
 # Session.begin() can only handle one transaction
 
@@ -34,9 +37,16 @@ def engine(tmp_path):
         s.add_all([s1, s2, b1, r1])
         s.commit()
 
-    yield engine
+    return engine
 
     # os.remove(db_name)
+
+@pytest.fixture()
+def row():
+    return {'rental_id': 111744877, 'bike_number': 1,
+     'start_time': '2021-01-31 23:49:56', 'end_time': '2021-02-01 00:11:06',
+     'rental_station': 'Galeria Dominikanska', 'return_station': 'Mickiewicza',
+     'durance': 22}
 
 
 class TestGetObjectAndCreateIfNotExist:
@@ -66,12 +76,7 @@ class TestGetObjectAndCreateIfNotExist:
 # add_rental_data_to_db
 class TestRentalDataToDb:
 
-    def test_should_add_rental_to_db(self, engine):
-        row = {'rental_id': 111744877, 'bike_number': 1,
-               'start_time': '2021-01-31 23:49:56', 'end_time': '2021-02-01 00:11:06',
-               'rental_station': 'Galeria Dominikanska', 'return_station': 'Mickiewicza',
-               'durance': 22}
-
+    def test_should_add_rental_to_db(self, engine, row):
         with Session(engine) as session:
             add_rental_data_to_db(row, session)
             rental = session.scalars(select(Rental).
@@ -83,3 +88,44 @@ class TestRentalDataToDb:
             assert rental.rent_bike == bike
             assert rental.rental_id == 111744877
             assert rental.rental_station == rental_station
+
+
+class TestValidate:
+
+    def test_for_valid_row(self, row):
+        assert validate(row)
+
+    def test_for_invalid_row_missing_data(self):
+        instance = {'rental_id': '111744877', 'bike_number': '1',
+            'start_time': '2021-01-31 23:49:56', 'end_time': '2021-02-01 00:11:06',
+            'rental_station': None, 'return_station': 'Mickiewicza',
+            'durance': '22'}
+        assert not validate(instance)
+
+    @pytest.mark.parametrize("instance", [
+        {'rental_id': '-1', 'bike_number': '1',
+         'start_time': '2021-01-31 23:49:56', 'end_time': '2021-02-01 00:11:06',
+         'rental_station': 'Galeria Dominikanska', 'return_station': 'Mickiewicza',
+         'durance': '22'},
+        {'rental_id': '111744877', 'bike_number': '1',
+         'start_time': '2021/01/31 23:49:56', 'end_time': '2021-02-01 00:11:06',
+         'rental_station': 'Galeria Dominikanska', 'return_station': 'Mickiewicza',
+         'durance': '22'},
+        {'rental_id': '111744877', 'bike_number': '1.1243',
+         'start_time': '2021-01-31 23:49:56', 'end_time': '2021-02-01 00:11:06',
+         'rental_station': 'Galeria Dominikanska', 'return_station': 'Mickiewicza',
+         'durance': '22'}
+    ])
+    def test_for_invalid_datatype(self, instance):
+        assert not validate(instance)
+
+
+def test_encoding():
+    filepath = r"C:\Users\julia\PycharmProjects\ScriptLanguages\labs\lab10\data\test_data.csv"
+    with open(filepath, encoding='utf-8') as f:
+        fieldnames = ['rental_id', 'bike_number', 'start_time', 'end_time', 'rental_station',
+                      'return_station', 'durance']
+        dict_reader = csv.DictReader(f, fieldnames=fieldnames)
+        next(dict_reader)  # skip header
+        for row in dict_reader:
+            print(row['rental_station'], row['return_station'])

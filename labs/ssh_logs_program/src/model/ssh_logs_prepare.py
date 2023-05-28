@@ -4,6 +4,9 @@ from collections import namedtuple
 from labs.ssh_logs_program.src.model.regex_ssh_utilis import get_user_from_str
 from typing import NamedTuple
 
+PATTERN = re.compile("(?P<date>\w+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+"
+                     "(?P<host>\w*)\s*sshd\[(?P<pid>\d+)]:\s+(?P<message>.+)")
+
 
 class LogEntry(NamedTuple):
     date: datetime.datetime
@@ -13,9 +16,6 @@ class LogEntry(NamedTuple):
 
 
 class Parser:
-
-    PATTERN = re.compile("(?P<date>\w+\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+"
-                     "(?P<host>\w*)\s*sshd\[(?P<pid>\d+)]:\s+(?P<message>.+)")
 
     def __init__(self):
         self.curr_year = 2022
@@ -38,14 +38,14 @@ class Parser:
 
     def parse_entry(self, entry):
         entry = entry.strip()
-        match = re.match(Parser.PATTERN, entry)
+        match = re.match(PATTERN, entry)
 
         if not match:
             raise ValueError(f"Couldn't parse: {entry}")
 
         host = get_user_from_str(entry)
 
-        return Parser.log_entry(date=self.get_date(match),
-                                host=host if host else "",
-                                pid=int(match.group('pid')),
-                                message=match.group('message'))
+        return LogEntry(date=self.get_date(match),
+                        host=host if host else "",
+                        pid=int(match.group('pid')),
+                        message=match.group('message'))

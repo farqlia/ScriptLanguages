@@ -16,13 +16,17 @@ USER_PATTERNS = [re.compile(r"((?<=[^r]user[\s=])(?!authentication)\s*[\w\-.]+|r
 
 PORT_PATTERN = re.compile(r"port (\d+)")
 # error: [\w\s:.]+:(?P<cause>\w+)
+
 ERROR_CAUSE_PATTERN = re.compile(r"error: (?P<event>received disconnect|connect_to)[\w\s:.]+: (?P<cause>[\w\s]+)")
 
-ACCEPTED_PASSWORD_PATTERN = re.compile(r"Accepted password for (?P<user>\w+) from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<port>\d+) ssh2")
+ACCEPTED_PASSWORD_PATTERN = re.compile(r"Accepted password for (?P<user>\w+) "
+                                       r"from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<port>\d+) ssh2")
 
-FAILED_PASSWORD_PATTERN = re.compile(r"Failed password for (?P<user>\w+) from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<port>\d+) ssh2")
+FAILED_PASSWORD_PATTERN = re.compile(r"Failed password for (?P<user>\w+) "
+                                     r"from (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<port>\d+) ssh2")
 
-ERROR_PATTERN = re.compile(r"error: (?:Received disconnect from|connect_to) (?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
+ERROR_PATTERN = re.compile(r"error: (?:Received disconnect from|connect_to) "
+                           r"(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 
 
 class MessageType(Enum):
@@ -47,7 +51,7 @@ MESSAGE_PATTERNS = [(MessageType.BREAK_IN_ATTEMPT, re.compile("break[\s\-]?in"))
                     (MessageType.OTHER, re.compile(".*"))]
 
 
-def get_ipv4s_from_log(entry) -> Union[List[IPv4Address], None]:
+def get_ipv4s_from_log(entry) -> Union[List[str], None]:
     matches = re.findall(IPV4_PATTERN, entry.message)
     for match in matches:
         try:

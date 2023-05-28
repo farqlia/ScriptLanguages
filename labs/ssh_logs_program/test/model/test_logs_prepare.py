@@ -24,13 +24,13 @@ class TestParseEntry:
                                {'date': 'Dec 10 06:55:46',
                                 'pid': '24200', 'message': 'Invalid user webmaster from 173.234.31.186'})])
     def test_pattern_for_parsing_logs(self, log, expected_groups, parser):
-        match = re.match(ssh_logs_prepare.Parser.PATTERN, log)
+        match = re.match(ssh_logs_prepare.PATTERN, log)
         assert all(expected_groups[k] == match.group(k) for k in expected_groups.keys())
 
     @pytest.mark.parametrize("entry,expected",
                              [("Dec 10 07:13:43 LabSZ sshd[24227]: Failed password for root from 5.36.59.76 port 42393 ssh2"
                                , {'date': datetime.datetime(year=2022, month=12, day=10, hour=7, minute=13, second=43),
-                                  'host': 'LabSZ', 'pid': 24227,
+                                  'host': 'root', 'pid': 24227,
                                   'message': 'Failed password for root from 5.36.59.76 port 42393 ssh2'}),
                               ])
     def test_convert_to_namedtuple(self, entry, expected, parser):

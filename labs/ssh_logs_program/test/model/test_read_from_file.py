@@ -20,4 +20,4 @@ def test_read_successfully_from_file(file):
 
 def test_read_unsuccessfully_from_file():
     logs = read_logs_from_file.SSHLogsHandler().read_from_file("data/")
-    assert len(logs) == 0
+    assert logs is None

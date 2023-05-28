@@ -47,6 +47,7 @@ def compute_bytes(log_entry):
 def log_bytes_read(log_entry):
     logging.debug(f"Bytes read: {compute_bytes(log_entry)}")
 
+
 def log_data(log_entry, display=False):
 
     mssg_type = analyze_ssh_logs.get_message_type(log_entry)
