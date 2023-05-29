@@ -4,7 +4,7 @@ from ipaddress import IPv4Address
 import labs.ssh_logs_program.src.model.regex_ssh_utilis as regex_ssh_utils
 from labs.ssh_logs_program.src.model.ssh_logs_prepare import Parser, LogEntry
 from datetime import datetime
-from typing import List, Union, Tuple, Optional, NamedTuple
+from typing import List, Tuple, Optional
 from re import Match
 
 parser: Parser = Parser()

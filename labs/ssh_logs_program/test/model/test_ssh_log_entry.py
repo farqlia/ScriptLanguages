@@ -7,11 +7,8 @@ from ipaddress import IPv4Address
 import labs.ssh_logs_program.src.model.regex_ssh_utilis as regex_ssh_utilis
 
 
-# Dec 14 16:02:42 LabSZ sshd[10327]: fatal: Read from socket failed: Connection reset by peer [preauth] ??
-
 class TestSSHLogEntry:
 
-    # hostname is optional
     @pytest.fixture()
     def instance(self):
         instance = "Dec 12 14:20:38 sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2"
@@ -20,7 +17,8 @@ class TestSSHLogEntry:
     def test_properties(self, instance):
         assert instance.validate()
         assert instance.date == datetime.datetime(year=2022, month=12, day=12, hour=14, minute=20, second=38)
-        assert instance.raw_log == "Dec 12 14:20:38 sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2"
+        assert instance.raw_log == "Dec 12 14:20:38 sshd[29040]: Accepted password " \
+                                   "for curi from 137.189.88.215 port 33299 ssh2"
         assert instance.message == "Accepted password for curi from 137.189.88.215 port 33299 ssh2"
         assert instance.pid == 29040
         assert instance.host == 'curi'
@@ -33,10 +31,12 @@ class TestSSHLogEntry:
                                           "Accepted password for curi from 137.189.88.215 port 33299 ssh2")
 
     def test_magic_method__repr__(self, instance):
-        assert instance.__repr__() == "Dec 12 14:20:38 sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2"
+        assert instance.__repr__() == "Dec 12 14:20:38 sshd[29040]: Accepted password" \
+                                      " for curi from 137.189.88.215 port 33299 ssh2"
 
     def test_magic_method__eg__(self, instance):
-        other_instance = ssh_log_entry.AcceptedPassword("Dec 12 14:20:38 sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2")
+        other_instance = ssh_log_entry.AcceptedPassword("Dec 12 14:20:38 sshd[29040]: Accepted password "
+                                                        "for curi from 137.189.88.215 port 33299 ssh2")
         assert instance.__eq__(other_instance)
 
     @pytest.mark.parametrize("other,result",
@@ -201,21 +201,33 @@ class TestOther:
 class TestGetIPv4Address:
 
     @pytest.mark.parametrize("instance,expected",
-                             [(ssh_log_entry.AcceptedPassword("Dec 12 14:20:38 sshd[29040]: Accepted password for curi from 137.189.88.215 port 33299 ssh2"), "137.189.88.215"),
-                              (ssh_log_entry.FailedPassword("Dec 13 11:00:21 LabSZ sshd[5459]: Failed password for zachary from 218.17.80.182 port 50313 ssh2"), "218.17.80.182"),
-                              (ssh_log_entry.Error("Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to 10.10.34.41 port 22: failed."), "10.10.34.41"),
-                              (ssh_log_entry.Other("Dec 13 19:01:01 LabSZ sshd[6317]: Failed none for invalid user 0 from 181.214.87.4 port 42391 ssh2"), "181.214.87.4")])
+                             [(ssh_log_entry.AcceptedPassword("Dec 12 14:20:38 sshd[29040]: Accepted password for curi"
+                                                              " from 137.189.88.215 port 33299 ssh2"),
+                               "137.189.88.215"),
+                              (ssh_log_entry.FailedPassword("Dec 13 11:00:21 LabSZ sshd[5459]: Failed password for "
+                                                            "zachary from 218.17.80.182 port 50313 ssh2"),
+                               "218.17.80.182"),
+                              (ssh_log_entry.Error("Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to "
+                                                   "10.10.34.41 port 22: failed."),
+                               "10.10.34.41"),
+                              (ssh_log_entry.Other("Dec 13 19:01:01 LabSZ sshd[6317]: Failed none for "
+                                                   "invalid user 0 from 181.214.87.4 port 42391 ssh2"),
+                               "181.214.87.4")])
     def test_correct_ipv4_addresses(self, instance, expected):
         assert instance.get_ipv4_address() == ipaddress.IPv4Address(expected)
 
     @pytest.mark.parametrize("instance",
-                             [ssh_log_entry.AcceptedPassword("Dec 12 14:20:38 sshd[29040]: Accepted password for curi from 255.255.255.256 port 33299 ssh2"),
-                              ssh_log_entry.Error("Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to 666.2.1.4 port 22: failed.")])
+                             [ssh_log_entry.AcceptedPassword("Dec 12 14:20:38 sshd[29040]: Accepted password for "
+                                                             "curi from 255.255.255.256 port 33299 ssh2"),
+                              ssh_log_entry.Error("Dec 16 17:02:11 LabSZ sshd[29026]: error: connect_to "
+                                                  "666.2.1.4 port 22: failed.")])
     def test_invalid_ipv4_addresses(self, instance):
         assert not instance.has_ip
 
     @pytest.mark.parametrize("instance",
-                             [ssh_log_entry.Other("Jan  3 18:15:58 LabSZ sshd[5518]: pam_unix(sshd:auth): check pass; user unknown"),
-                              ssh_log_entry.Other("Dec 12 18:03:07 LabSZ sshd[30884]: pam_unix(sshd:session): session opened for user curi by (uid=0)")])
+                             [ssh_log_entry.Other("Jan  3 18:15:58 LabSZ sshd[5518]: pam_unix(sshd:auth): "
+                                                  "check pass; user unknown"),
+                              ssh_log_entry.Other("Dec 12 18:03:07 LabSZ sshd[30884]: pam_unix(sshd:session): "
+                                                  "session opened for user curi by (uid=0)")])
     def test_no_ipv4_addresses(self, instance):
         assert not instance.has_ip

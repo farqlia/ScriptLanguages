@@ -10,7 +10,6 @@ from typing import Iterable, List, Union, Any, Callable, Optional
 
 # Subclasses are responsible for providing concrete subclass instances
 # So we basically have two parallel hierarchies
-
 # Zewnetrzna klasa kreatora
 
 
@@ -32,7 +31,7 @@ class SSHLogJournal(LogJournal):
         is_valid: bool = instance is not None and instance.validate()
         if is_valid:
             # Ignore because there is check for None
-            self.container.append(instance)   # type: ignore
+            self.container.append(instance)    # type: ignore
         return is_valid
 
     @staticmethod
@@ -73,11 +72,13 @@ class SSHLogJournal(LogJournal):
         journal_or_instance: Union[SSHLogJournal, SSHLogEntry]
         if isinstance(index, slice):
             if isinstance(index.start, IPv4Address) or isinstance(index.stop, IPv4Address):
-                start_address: IPv4Address = ipaddress.IPv4Address("0.0.0.0") if index.start is None else index.start
-                stop_address: IPv4Address = ipaddress.IPv4Address("255.255.255.255") if index.stop is None else index.stop
+                start_address: IPv4Address = ipaddress.IPv4Address("0.0.0.0") if index.start \
+                                                                                 is None else index.start
+                stop_address: IPv4Address = ipaddress.IPv4Address("255.255.255.255") if index.stop \
+                                                                                is None else index.stop
                 journal_or_instance = self.filter(lambda ssh_log: ssh_log.has_ip
-                # ignore because there is check for None
-                and start_address <= ssh_log.get_ipv4_address() < stop_address)    # type: ignore
+                    # ignore because there is check for None
+                    and start_address <= IPv4Address(ssh_log.get_ipv4_address()) < stop_address)
             elif isinstance(index.start, datetime) or isinstance(index.stop, datetime):
                 start_dt: datetime = datetime.min if index.start is None else index.start
                 stop_dt: datetime = datetime.max if index.stop is None else index.stop
