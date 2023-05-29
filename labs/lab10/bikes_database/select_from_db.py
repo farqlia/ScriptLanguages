@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import DatabaseError
 from labs.lab10.bikes_database.rents_metadata import Rental, Bike, Station, Base
 from sqlalchemy import func
+from sqlalchemy import over
 
 
 class SQLSelector:
@@ -39,11 +40,19 @@ class SQLSelector:
                                       .where(Station.station_name == station_name)
                                       .join(Rental.rental_station))
                                   .subquery())
-
             n_of_bikes = union.distinct().count()
-            # n_of_bikes = session.execute(union.group_by(Station.station_name).
-              #                            where(Station.station_name == station_name))
-                                         #.subquery()
-                                         #.select(Station.station_name, func.count(Rental.bike_number.distinct())).
-                                        #where(Station.station_name == station_name).group_by(Station.station_id))
+
             return n_of_bikes
+
+    def compute_average_daily_rentals_from_station(self, station_name):
+        with Session(self.engine) as session:
+            query = session.query(select(func.count(Station.station_name).label('n_rentals'))
+                                            .where(Station.station_name == station_name)
+                                            .join(Rental.rental_station)
+                                  .group_by(func.date(Rental.start_time).label('Day')).subquery())
+
+            results = session.execute(func.avg(query)).first()
+
+        return results[0]
+
+
