@@ -56,6 +56,6 @@ class TestSqlSelector:
 
     def test_compute_n_of_bikes_parked(self, instance):
         n_bikes = instance.compute_number_of_bikes_parked("Galeria Dominikanska")
-        print(n_bikes)
+        assert n_bikes == 2
         # for row in n_bikes:
           #   print(row)

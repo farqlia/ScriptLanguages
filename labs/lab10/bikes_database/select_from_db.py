@@ -16,21 +16,19 @@ class SQLSelector:
             stations = session.scalars(select(Station))
             return list(stations)
 
-    def compute_average_rental_time_starting_at_station(self, station_name):
+    def _compute_average_durance_time(self, station_name, rental_join_key):
         with Session(self.engine) as session:
             average = session.execute(select(func.avg(Rental.durance).label('average')).
-                                   join(Rental.rental_station).
+                                   join(rental_join_key).
                                    where(Station.station_name == station_name))
 
             return average.first()[0]
+
+    def compute_average_rental_time_starting_at_station(self, station_name):
+        return self._compute_average_durance_time(station_name, Rental.rental_station)
 
     def compute_average_rental_time_ending_at_station(self, station_name):
-        with Session(self.engine) as session:
-            average = session.execute(select(func.avg(Rental.durance).label('average')).
-                                   join(Rental.return_station).
-                                   where(Station.station_name == station_name))
-
-            return average.first()[0]
+        return self._compute_average_durance_time(station_name, Rental.return_station)
 
     def compute_number_of_bikes_parked(self, station_name):
         with Session(self.engine) as session:
