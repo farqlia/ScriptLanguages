@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import DatabaseError
 from labs.lab10.bikes_database.rents_metadata import Rental, Bike, Station, Base
@@ -46,13 +46,15 @@ class SQLSelector:
 
     def compute_average_daily_rentals_from_station(self, station_name):
         with Session(self.engine) as session:
-            query = session.query(select(func.count(Station.station_name).label('n_rentals'))
+            query = session.query(select(func.date(Rental.start_time).label("rdate"), func.count(Rental.rental_id).label('count'))
                                             .where(Station.station_name == station_name)
                                             .join(Rental.rental_station)
-                                  .group_by(func.date(Rental.start_time).label('Day')).subquery())
+                                  .group_by(text("rdate")).subquery("sub"))
 
-            results = session.execute(func.avg(query)).first()
 
-        return results[0]
+            # results = list(session.scalars(query))
+            result = session.scalars(select(func.avg(text("sub_count"))).select_from(query)).first()
+
+        return result
 
 

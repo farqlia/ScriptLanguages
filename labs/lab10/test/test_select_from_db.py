@@ -28,7 +28,7 @@ db_rows = [
      'start_time': '2021-01-02 17:01:00', 'end_time': '2021-01-02 17:16:00',
      'rental_station': 'Swidnicka', 'return_station': 'Galeria Dominikanska',
      'durance': 15},
-    {'rental_id': 6, 'bike_number': 3,
+    {'rental_id': 6, 'bike_number': 2,
      'start_time': '2021-01-03 18:00:00', 'end_time': '2021-02-05 18:20:00',
      'rental_station': 'Mickiewicza', 'return_station': 'Swidnicka',
      'durance': 20},
@@ -47,6 +47,7 @@ def db_name(tmp_path):
             add_rental_data_to_db(row, session)
 
     return db_name
+
 
 @pytest.fixture()
 def engine(tmp_path, db_name):
@@ -89,7 +90,6 @@ class TestSqlSelector:
                               ('Mickiewicza', 2)])
     def test_compute_average_daily_rentals_from_station(self, station, avg_rentals, instance):
         assert avg_rentals == instance.compute_average_daily_rentals_from_station(station)
-
 
     def test_how_lag_works(self, engine):
         with Session(engine) as session:

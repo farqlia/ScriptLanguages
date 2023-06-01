@@ -67,9 +67,9 @@ class Station(Base):
     station_name: Mapped[str] = mapped_column(String(30), unique=True)
 
     start_of_rentals: Mapped[List['Rental']] = relationship(back_populates='rental_station',
-                                                           foreign_keys="[Rental.rental_station_id]")
+                                                            foreign_keys="[Rental.rental_station_id]")
     end_of_rentals: Mapped[List['Rental']] = relationship(back_populates='return_station',
-                                                           foreign_keys="[Rental.return_station_id]")
+                                                            foreign_keys="[Rental.return_station_id]")
 
     def __repr__(self):
         return f"Station(station_id={self.station_id!r}, station_name={self.station_name!r})"

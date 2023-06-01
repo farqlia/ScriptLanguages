@@ -2,8 +2,9 @@ import sys
 
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QWidget, \
     QLineEdit, QPushButton, QHBoxLayout, QListWidget, QVBoxLayout, \
-    QLabel, QComboBox, QTextEdit, QMessageBox, QHBoxLayout
+    QLabel, QComboBox, QTextEdit, QMessageBox, QHBoxLayout, QFileDialog
 from PySide6.QtCore import Qt, QSize
+from pathlib import Path
 from labs.lab10.bikes_database.select_from_db import SQLSelector
 
 QUERY_AVERAGE_RENTAL_TIME_STARTING_AT_STATION = "Compute average rental time starting at the station"
@@ -11,6 +12,7 @@ QUERY_AVERAGE_RENTAL_TIME_ENDING_AT_STATION = "Compute average rental time endin
 QUERY_NUMBER_OF_BIKES_PARKED_AT_STATION = "Compute number of distinct bikes parked at the station"
 QUERY_AVERAGE_TIME_BETWEEN_VISITING_STATION = "Compute average daily rentals initiated at the station"
 
+CURRENT_DIRECTORY = Path(__file__).parents[1]
 
 QUERY_MAPPINGS = {
     QUERY_AVERAGE_RENTAL_TIME_STARTING_AT_STATION: "compute_average_rental_time_starting_at_station",
@@ -28,6 +30,7 @@ class MainWindow(QMainWindow):
         # There must be a text entry to enter database path
 
         self.sql_selector = None
+        self.database_name = None
 
         self.setFixedSize((QSize(600, 500)))
         window_layout = QGridLayout()
@@ -40,13 +43,11 @@ class MainWindow(QMainWindow):
         # up_widget_layout = QGridLayout()
         # up_widget_layout.rowStretch(1)
         # up_widget_layout.columnStretch(6)
-        self.database_name = QLineEdit()
         self.open_database_button = QPushButton()
         self.open_database_button.setText("Open")
 
         up_widget_layout.addWidget(QLabel("Enter DB location: "), alignment=Qt.AlignmentFlag.AlignLeft)
-        up_widget_layout.addWidget(self.database_name, alignment=Qt.AlignmentFlag.AlignCenter)
-        up_widget_layout.addWidget(self.open_database_button, alignment=Qt.AlignmentFlag.AlignRight)
+        up_widget_layout.addWidget(self.open_database_button, alignment=Qt.AlignmentFlag.AlignCenter)
         up_widget.setLayout(up_widget_layout)
 
         '''
@@ -96,8 +97,9 @@ class MainWindow(QMainWindow):
 
     def connect_to_db(self):
         self.stations_list_widget.clear()
-        self.sql_selector = SQLSelector(self.database_name.text().strip())
-        self.stations_list_widget.addItems([s.station_name for s
+        if self.open_file_dialog():
+            self.sql_selector = SQLSelector(str(self.database_name))
+            self.stations_list_widget.addItems([s.station_name for s
                                             in self.sql_selector.select_all_stations()])
 
     def run_query(self):
@@ -116,6 +118,18 @@ class MainWindow(QMainWindow):
         dlg.setStandardButtons(QMessageBox.StandardButton.Ok)
         dlg.setIcon(QMessageBox.Icon.Warning)
         dlg.exec()
+
+    def open_file_dialog(self):
+        dialog = QFileDialog(self)
+        dialog.setDirectory(str(CURRENT_DIRECTORY))
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
+        # dialog.setNameFilter("*.db")
+        if dialog.exec():
+            database_names = dialog.selectedFiles()
+            if database_names:
+                self.database_name = Path(database_names[0])
+                return True
+        return False
 
 
 if __name__ == "__main__":
