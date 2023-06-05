@@ -1,0 +1,73 @@
+IdU;Nazwisko;Imie;DUr;Plec;KlasaU;Miasto
+1;Bietrus;Joanna;2008-1-1 00:00:00;K;IIb;6
+2;Bietrus;Karol;2008-1-1 00:00:00;M;VIIIc;13
+3;Bietrus;Karol;2005-4-6 00:00:00;M;VIIIc;7
+4;Bietrus;Joanna;2007-7-7 00:00:00;K;;6
+5;Zielińska;Maria;2005-12-31 00:00:00;K;VIIb;12
+6;Mietkowski;Mieczysław;2008-1-1 00:00:00;M;VIIb;3
+7;Nowak;Paweł;2007-6-7 00:00:00;M;VIIIc;19
+8;Antas;Anita;;K;VIIIc;12
+9;Antas;Maja;2008-4-5 00:00:00;K;VIIIc;7
+10;Antas;Piotr;;M;VIIId;13
+11;Antas;Piotr;2008-7-7 00:00:00;M;VIIIe;2
+12;Nowak;Ignacy;2009-8-31 00:00:00;M;VIIb;10
+13;Dobrowolski;Piotr;;M;IIId;3
+14;Dobrowolska;Anna;2008-1-1 00:00:00;;IIb;
+15;Dobrowolski;Jan;2012-4-8 00:00:00;M;;2
+16;Dobrowolska;Anna;2008-5-3 00:00:00;K;VIIId;12
+17;Ciosek;Julia;2005-6-5 00:00:00;K;VIIIc;13
+18;Ciosek;Jan;2009-4-2 00:00:00;M;VIIId;11
+19;Ciosek;Jędrzej;2010-7-6 00:00:00;M;IIId;8
+20;Ciosek;Julia;;K;;7
+21;Garcia;Maria;;K;VIIId;
+22;Garcia;Van;2010-7-7 00:00:00;M;IIId;21
+23;Brown;Philip;2009-8-2 00:00:00;M;VIIc;20
+24;Brown;Sabina;2010-3-6 00:00:00;K;IIb;1
+25;Brown-Johnson;Linda;2008-1-1 00:00:00;K;IIb;1
+27;Jesień-Mróz;Katarzyna;;K;VIIIe;19
+28;Jesień-Mróz;Andrzej;2008-6-6 00:00:00;M;VIIId;
+29;Jesień-Mróz;Małgorzata;2009-8-3 00:00:00;K;VIIIe;10
+30;Grzeżułkowska-Fidelus;Maria;2010-3-7 00:00:00;K;;
+31;Grzeżułkowski;Maciej;2009-7-2 00:00:00;M;VIIIc;6
+32;Yevtushenkov;Denis;2009-7-4 00:00:00;M;VIIIb;1
+33;Yevtushenkov;Katsiaryna;2008-6-3 00:00:00;K;VIIb;11
+34;Dayenko Gagarin;Daenys;2007-7-7 00:00:00;M;VIIId;11
+35;Johnson;Michael;2007-5-3 00:00:00;M;;
+36;Johnson-Brown;Richard;2006-6-3 00:00:00;M;VIIIe;9
+37;Johnson-Brown;Sergiej;2009-6-3 00:00:00;M;IIId;13
+38;Święcka;Michalina;2008-9-27 00:00:00;K;;1
+39;Święcki;Piotr;;M;;
+40;Bietrus;Joanna;;K;;
+41;Brzęczyszczykiewicz-Kos;Aldona;2009-7-8 00:00:00;K;VIIIb;8
+42;Os;Agata;2010-6-2 00:00:00;;IIb;2
+43;Kosińska-Faradaj;Magdalena;2008-8-3 00:00:00;K;VIIId;13
+44;Kosiński;Maciek;;M;;7
+45;Kosińska;Ania;;K;VIIc;12
+46;Ngoc Than;Huang;2009-12-7 00:00:00;M;VIIIb;18
+47;Ngoc Than;Wu;;M;VIIId;7
+48;Martin-Miller;William;2010-7-5 00:00:00;M;;
+49;Martin;Jennifer;2011-6-14 00:00:00;K;Ib;
+50;Ciemienna;Julia;;K;Ib;20
+51;Boyes' Vi;Marcia;2010-7-1 00:00:00;K;VIIIe;2
+52;Oz;Hanna;2012-8-4 00:00:00;K;Ib;13
+53;Oz;Michał;;;IIId;3
+54;Oleksiewicz-Moh;Paweł;2011-8-3 00:00:00;M;Ib;1
+55;Ulman;Zuzanna;2009-7-2 00:00:00;;VIIb;9
+56;Nowak;Daria;;K;VIIIe;9
+57;Nowak;Tomasz;2008-2-28 00:00:00;M;VIIb;12
+58;Yemyelanova;Vera;2009-5-3 00:00:00;K;VIIId;
+59;Rzeżucha;Michał;;M;VIIIb;11
+60;Żonkil;Mercedes;2012-8-4 00:00:00;K;Ib;10
+61;Żonkil;Patricia;2011-4-8 00:00:00;K;IIId;9
+62;Abadżakanowska-Śliwakowska;Małgorzata;;K;VIIIc;
+63;Żonkil;Anna;;K;IIb;6
+64;Yevtushenkov;Yana;;K;IIi;7
+65;Oz;Paweł;2012-8-4 00:00:00;M;IIi;15
+66;Malinowska;Anna;2012-5-5 00:00:00;K;IIi;16
+67;Malinowski;Władysław;2010-6-7 00:00:00;M;IIIa;17
+68;Brzęczyszczykiewicz;Adrian;2011-3-3 00:00:00;M;IIIa;16
+69;Sos;Wierzchosława;;K;IIb;17
+70;Sos;Wierzchosław;2012-1-1 00:00:00;M;IIi;12
+71;Żonkil;Anna;2010-1-2 00:00:00;;IIi;3
+72;Malinowska;Beata;2010-3-4 00:00:00;K;IIi;16
+73;Grzeżułkowska-Fidelus;Patrycja;2010-5-1 00:00:00;K;IIIa;18

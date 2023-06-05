@@ -51,10 +51,9 @@ class SQLSelector:
                                             .join(Rental.rental_station)
                                   .group_by(text("rdate")).subquery("sub"))
 
+            result = session.scalars(select(func.avg(text("sub_count")))
+                                     .select_from(query)).first()
 
-            # results = list(session.scalars(query))
-            result = session.scalars(select(func.avg(text("sub_count"))).select_from(query)).first()
-
-        return result
+        return round(result, 2)
 
 

@@ -113,7 +113,7 @@ if __name__ == "__main__":
     if not filepath.exists():
         raise FileNotFoundError("File couldn't be found")
 
-    engine = create_engine(f"sqlite:///{db_name}?charset=utf8mb4", echo=True)
+    engine = create_engine(f"sqlite:///{db_name}?charset=utf8mb4")
     Base.metadata.create_all(engine)
 
     load_from_file(engine, filepath)

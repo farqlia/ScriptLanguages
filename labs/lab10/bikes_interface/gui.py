@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QWidget, \
 from PySide6.QtCore import Qt, QSize
 from pathlib import Path
 from labs.lab10.bikes_database.select_from_db import SQLSelector
+from sqlalchemy.exc import DatabaseError
 
 QUERY_AVERAGE_RENTAL_TIME_STARTING_AT_STATION = "Compute average rental time starting at the station"
 QUERY_AVERAGE_RENTAL_TIME_ENDING_AT_STATION = "Compute average rental time ending at the station"
@@ -106,7 +107,7 @@ class MainWindow(QMainWindow):
         query_name = self.query_combo_box.currentText()
         if self.sql_selector:
             query_result = getattr(self.sql_selector, QUERY_MAPPINGS[query_name])\
-                (self.stations_list_widget.currentItem().text())
+                    (self.stations_list_widget.currentItem().text())
             self.result_text.setText("Result = " + str(query_result))
         else:
             self.display_error_msg("The database is not present")
