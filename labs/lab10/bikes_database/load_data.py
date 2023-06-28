@@ -39,6 +39,7 @@ CONSTRAINTS = {'rental_id': is_non_negative_integer,
 def get_object_and_create_if_not_exist(object_row, object_type, key_column, session):
     obj = session.scalars(select(object_type).
                           where(getattr(object_type, key_column) == object_row[key_column])).first()
+
     if not obj:
         obj = object_type(**object_row)
         session.add(obj)

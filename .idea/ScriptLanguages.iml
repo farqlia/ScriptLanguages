@@ -26,4 +26,11 @@
     <orderEntry type="jdk" jdkName="Python 3.11 (ScriptLanguages) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="TemplatesService">
+    <option name="TEMPLATE_FOLDERS">
+      <list>
+        <option value="$MODULE_DIR$/lectures/network_and_web_programming/flask_app/templates" />
+      </list>
+    </option>
+  </component>
 </module>

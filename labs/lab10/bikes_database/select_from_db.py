@@ -23,7 +23,7 @@ class SQLSelector:
                                    join(rental_join_key).
                                    where(Station.station_name == station_name))
 
-            return average.first()[0]
+            return round(average.first()[0], 2)
 
     def compute_average_rental_time_starting_at_station(self, station_name):
         return self._compute_average_durance_time(station_name, Rental.rental_station)
@@ -46,10 +46,11 @@ class SQLSelector:
 
     def compute_average_daily_rentals_from_station(self, station_name):
         with Session(self.engine) as session:
-            query = session.query(select(func.date(Rental.start_time).label("rdate"), func.count(Rental.rental_id).label('count'))
+            query = session.query(select(func.date(Rental.start_time).label("rdate"),
+                                         func.count(Rental.rental_id).label('count'))
                                             .where(Station.station_name == station_name)
                                             .join(Rental.rental_station)
-                                  .group_by(text("rdate")).subquery("sub"))
+                                            .group_by(text("rdate")).subquery("sub"))
 
             result = session.scalars(select(func.avg(text("sub_count")))
                                      .select_from(query)).first()
